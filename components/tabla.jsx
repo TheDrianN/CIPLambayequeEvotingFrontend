@@ -1,5 +1,7 @@
-import React, { useState, useMemo } from "react";
+import React, { useState,useEffect } from "react";
 import DataTable from "react-data-table-component";
+import InputField from "../components/InputField";
+import Card from "../components/Card";
 
 // Definimos los textos en español para la tabla
 const customStyles = {
@@ -14,11 +16,22 @@ const customStyles = {
       fontSize: '14px',
     },
   },
+  tableWrapper: {
+    style: {
+      display: 'block', // Esto asegura que el scroll horizontal se muestre en pantallas pequeñas
+      overflowX: 'auto',
+    },
+  },
 };
 
 const CustomDataTable = ({ columns, data }) => {
   const [filter, setFilter] = useState("");
   const [records, setRecords] = useState(data);
+
+    // Este hook se asegura de que los registros se actualicen cada vez que cambien los datos recibidos en 'data'
+    useEffect(() => {
+      setRecords(data);  // Actualizamos 'records' con los datos recibidos
+    }, [data]);  // Esto se ejecuta cada vez que 'data' cambia
 
   // Maneja el cambio en el input
   const handleChange = (e) => {
@@ -36,28 +49,35 @@ const CustomDataTable = ({ columns, data }) => {
   };
 
   return (
-    <div className="mt-3">
-      <input className="block rounded-md border-0 py-1.5 pl-7 pr-20 text-gray-900  ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-400"
-        type="text"
-        value={filter}
-        onChange={handleChange}
-        placeholder="Buscar..."
-      />
-      
-      <DataTable
-        columns={columns}
-        data={records}
-        customStyles={customStyles}
-        pagination
-        fixedHeader
-        paginationComponentOptions={{
-          rowsPerPageText: 'Filas por página:',
-          rangeSeparatorText: 'de',
-          noRowsPerPage: true,
-        }}
-        noDataComponent="No hay datos disponibles"
-      />
-    </div>
+    <Card>
+      <div className="mt-3">
+        <InputField 
+          type="text"
+          value={filter}
+          size="w-1/4"
+          onChange={handleChange}
+          placeholder="Buscar..."
+        />
+
+        <div className="table-responsive">
+          <DataTable
+            columns={columns}
+            data={records}
+            customStyles={customStyles}
+            pagination
+            fixedHeader
+            striped
+            compact
+            paginationComponentOptions={{
+              rowsPerPageText: 'Filas por página:',
+              rangeSeparatorText: 'de',
+              noRowsPerPage: true,
+            }}
+            noDataComponent="No hay datos disponibles"
+          />
+        </div>
+      </div>
+    </Card>
   );
 };
 

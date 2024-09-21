@@ -1,5 +1,7 @@
 import {Roboto } from "next/font/google";
 
+import './globals.css';
+
 export const metadata = {
   title: "CIP Evoting",
   description:"Esta es la pagina para iniciar sesión",

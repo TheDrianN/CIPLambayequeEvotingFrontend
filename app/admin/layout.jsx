@@ -1,25 +1,33 @@
 "use client";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import '../globals.css';
 
 export default function AdminLayout({ children }) {
-    const [activeLink, setActiveLink] = useState('/admin/procesoelectoral'); // Ruta activa por defecto
-    const [isMenuOpen, setIsMenuOpen] = useState(false); // Estado para el menú desplegable
+    // Cargar la ruta activa desde localStorage o usar la ruta por defecto
+    const [activeLink, setActiveLink] = useState('/admin/procesoelectoral');
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+    useEffect(() => {
+        // Obtener el valor de activeLink desde localStorage al montar el componente
+        const storedActiveLink = localStorage.getItem('activeLink');
+        if (storedActiveLink) {
+            setActiveLink(storedActiveLink);
+        }
+    }, []);
 
     // Función para manejar el clic en un enlace
     const handleLinkClick = (path) => {
         setActiveLink(path);
+        localStorage.setItem('activeLink', path); // Guardar el enlace activo en localStorage
     };
 
-    // Función para manejar el clic en el botón de menú
     const handleMenuToggle = () => {
         setIsMenuOpen(!isMenuOpen);
     };
 
     return (
         <div className="h-screen flex flex-col md:flex-row">
-            {/* Button for mobile menu */}
             <button
                 className="block md:hidden p-4 text-white bg-red-600 focus:outline-none"
                 onClick={handleMenuToggle}
@@ -40,16 +48,48 @@ export default function AdminLayout({ children }) {
                 </svg>
             </button>
 
-            {/* Sidebar */}
             <nav
                 className={`bg-red-600 text-white flex flex-col p-4 md:p-6 transition-transform transform ${
                     isMenuOpen ? 'translate-x-0' : 'hidden'
-                } md:translate-x-0 md:relative md:flex md:flex-col md:w-1/4`}
+                } md:translate-x-0 md:relative md:flex md:flex-col md:w-1/6`}
             >
                 <div className="text-center mb-4">
                     <img src='https://www.cip.org.pe/images/LOGO_CIP.png' alt="Logo" className="mx-auto w-20 h-20" />
                 </div>
                 <ul className="flex flex-col">
+                    <li className="mb-2">
+                        <Link href="/admin/capitulos" passHref>
+                            <h4
+                                onClick={() => handleLinkClick('/admin/capitulos')}
+                                className={`block p-2 rounded hover:bg-red-700 font-medium text-lg ${activeLink === '/admin/capitulos' ? 'text-amber-400' : ''}`}
+                            >
+                                Captitulos
+                            </h4>
+                        </Link>
+                    </li>
+
+                    <li className="mb-2">
+                        <Link href="/admin/votantes" passHref>
+                            <h4
+                                onClick={() => handleLinkClick('/admin/votantes')}
+                                className={`block p-2 rounded hover:bg-red-700 font-medium text-lg ${activeLink === '/admin/votantes' ? 'text-amber-400' : ''}`}
+                            >
+                                Votantes
+                            </h4>
+                        </Link>
+                    </li>
+
+                    <li className="mb-2">
+                        <Link href="/admin/rolcandidato" passHref>
+                            <h4
+                                onClick={() => handleLinkClick('/admin/rolcandidato')}
+                                className={`block p-2 rounded hover:bg-red-700 font-medium text-lg ${activeLink === '/admin/rolcandidato' ? 'text-amber-400' : ''}`}
+                            >
+                                Rol de Candidato
+                            </h4>
+                        </Link>
+                    </li>
+                    
                     <li className="mb-2">
                         <Link href="/admin/procesoelectoral" passHref>
                             <h1
@@ -61,15 +101,28 @@ export default function AdminLayout({ children }) {
                         </Link>
                     </li>
                     <li className="mb-2">
-                        <Link href="/admin/votantes" passHref>
-                            <h4
-                                onClick={() => handleLinkClick('/admin/votantes')}
-                                className={`block p-2 rounded hover:bg-red-700 font-medium text-lg ${activeLink === '/admin/votantes' ? 'text-amber-400' : ''}`}
+                        <Link href="/admin/subelections" passHref>
+                            <h1
+                                onClick={() => handleLinkClick('/admin/subelections')}
+                                className={`block p-2 rounded hover:bg-red-700 font-medium text-lg ${activeLink === '/admin/subelections' ? 'text-amber-400' : ''}`}
                             >
-                                Votantes
+                                Sub Proceso
+                            </h1>
+                        </Link>
+                    </li>
+
+                    <li className="mb-2">
+                        <Link href="/admin/candidatos" passHref>
+                            <h4
+                                onClick={() => handleLinkClick('/admin/candidatos')}
+                                className={`block p-2 rounded hover:bg-red-700 font-medium text-lg ${activeLink === '/admin/candidatos' ? 'text-amber-400' : ''}`}
+                            >
+                                Candidatos
                             </h4>
                         </Link>
                     </li>
+                   
+                   
                     <li className="mb-2">
                         <Link href="/admin/reportes" passHref>
                             <h4
@@ -89,7 +142,6 @@ export default function AdminLayout({ children }) {
                 </div>
             </nav>
 
-            {/* Main Content */}
             <main className="flex-1 p-4 bg-gray-100">
                 {children}
             </main>
