@@ -4,6 +4,7 @@ import CustomDataTable from "./tabla"; // Asegúrate de que la ruta sea correcta
 import ActionButtons from "./ActionButtons"
 import { useRouter } from 'next/navigation';
 import Swal from 'sweetalert2';
+import { width } from "@fortawesome/free-solid-svg-icons/fa0";
 
 // Función para obtener datos de la API
 const fetchData = async () => {
@@ -107,14 +108,17 @@ const ProcesoElectoralDataTable = () => {
             name: 'ID',
             selector: row => row.id, // Muestra el título del proceso
             sortable: true,
+            width:'80px',
         },
         {
           name: 'Título del Proceso',
           selector: row => row.title, // Muestra el título del proceso
           sortable: true,
+         
         },
         {
           name: 'Fecha Inicio',
+          width:'250px',
           selector: row => new Date(row.start_date).toLocaleString('es-PE', {
             weekday: 'short', // Día de la semana abreviado
             year: 'numeric',
@@ -127,6 +131,7 @@ const ProcesoElectoralDataTable = () => {
         },
         {
           name: 'Fecha Fin',
+          width:'250px',
           selector: row => new Date(row.end_date).toLocaleString('es-PE', {
             weekday: 'short', // Día de la semana abreviado
             year: 'numeric',
@@ -141,6 +146,7 @@ const ProcesoElectoralDataTable = () => {
           name: 'Estado',
           selector: row => row.status, // Muestra el estado del proceso
           sortable: true,
+          width:'150px',
         },
         {
           name: 'Acciones',

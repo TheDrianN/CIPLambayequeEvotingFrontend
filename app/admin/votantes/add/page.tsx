@@ -18,7 +18,7 @@ export default function VotantesPage(){
         surnames: '',
         status: '',
         chapter: '',
-        address: '',
+        date_of_birth: '',
         rol:'',
         email: '',
         phone: '',
@@ -33,19 +33,20 @@ export default function VotantesPage(){
         rol:'',
         chapter: '',
         email: '',
-        password: ''
+        password: '',
+        date_of_birth:''
     });
 
     const router = useRouter();
 
     
     const options = [
-        { value: 'H', label: 'Habilitado' },
-        { value: 'I', label: 'Inhabilitado' }
+        { value: 'V', label: 'VIGENTE' },
+        { value: 'I', label: 'NO VIGENTE' }
     ];
     const optionsRol = [
-        { value: 'V', label: 'Votante' },
-        { value: 'A', label: 'Administrador' }
+        { value: 'V', label: 'VOTANTE' },
+        { value: 'A', label: 'ADMINISTRADOR' }
     ];
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -92,7 +93,8 @@ export default function VotantesPage(){
           rol:'',
           chapter: '',
           email: '',
-          password: ''
+          password: '',
+          date_of_birth:''
       });
 
 
@@ -104,10 +106,13 @@ export default function VotantesPage(){
       if (!formValues.names) newErrors.names = 'Nombres completos son obligatorios';
       if (!formValues.surnames) newErrors.surnames = 'Apellidos completos son obligatorios';
       if (!formValues.status) newErrors.status = 'Estado es obligatorio';
+      if (!formValues.rol) newErrors.rol = 'Rol es obligatorio';
       if (!formValues.chapter) newErrors.chapter = 'Capítulo es obligatorio';
       if (!formValues.email) newErrors.email = 'Correo electrónico es obligatorio';
       if (!formValues.password) newErrors.password = 'Contraseña es obligatoria';
-  
+      if (!formValues.date_of_birth) newErrors.date_of_birth = 'Fecha nacimiento es obligatoria';
+
+      
       setErrors(newErrors);
   
       // Si hay errores, no enviar el formulario
@@ -120,11 +125,11 @@ export default function VotantesPage(){
           password: formValues.password,
           status: formValues.status,
           rol: formValues.rol,
-          names: formValues.names,
-          surnames: formValues.surnames,
+          names: formValues.names.toUpperCase(),
+          surnames: formValues.surnames.toUpperCase(),
           phone: formValues.phone,
           email: formValues.email,
-          address: formValues.address,
+          date_of_birth: new Date(formValues.date_of_birth).toISOString().split('T')[0],
           code_access: '', // Si no hay `code_access`, se envía como cadena vacía
       };
       console.log(userData);
@@ -156,7 +161,7 @@ export default function VotantesPage(){
                 surnames: '',
                 status: '',
                 chapter: '',
-                address: '',
+                date_of_birth: '',
                 rol: '',
                 email: '',
                 phone: '',
@@ -191,14 +196,15 @@ export default function VotantesPage(){
     return (
         <div className="m-5">
             <div className="flex flex-wrap items-center justify-between">
-                <h1 className="text-lg font-medium sm:mb-0 sm:text-xl">Datos del Votante</h1>
+                <h1 className="text-lg font-medium sm:mb-0 sm:text-xl">Datos del votante</h1>
             </div>
             <hr />
-            <Card className="flex-1 max-w-6xl mt-4 px-4">
+            <Card className="flex-1 max-w-full mt-4 px-6">
                 <form onSubmit={handleSubmit}>
-                    <div className="flex flex-wrap justify-between gap-4 mb-4">
-                        <div className="w-full sm:w-1/3">
-                            <label htmlFor="document">N° Documento Identidad / Codigo Colegiatura *</label>
+                    {/* Primera fila */}
+                    <div className="flex flex-wrap justify-between gap-1 mb-4">
+                        <div className="w-full sm:w-5/12">
+                            <label htmlFor="document">N° Documento identidad / Codigo colegiatura *</label>
                             <InputField
                                 value={formValues.document}
                                 id="document"
@@ -208,21 +214,21 @@ export default function VotantesPage(){
                             />
                         </div>
 
-                        <div className="w-full sm:w-1/3">
+                        <div className="w-full sm:w-5/12">
                             <label htmlFor="password">Contraseña *</label>
-                            <div className='flex flex-row items-center'>
-                                <div className="w-full">
+                            <div className="flex items-center">
+                                <div className="w-5/6">
                                     <InputField
                                         value={formValues.password}
                                         id="password"
                                         onChange={handleChange}
-                                        type="text"
+                                        type="password"
                                         error={errors.password}
                                     />
                                 </div>
                                 <Button
                                     onClick={handleAddNewPass}
-                                    width="w-1/6 sm:w-1/6"
+                                    width="w-1/6"
                                     background="bg-neutral-500"
                                     hovercolor="hover:bg-neutral-700"
                                     type="button"
@@ -233,9 +239,10 @@ export default function VotantesPage(){
                         </div>
                     </div>
 
+                    {/* Segunda fila */}
                     <div className="flex flex-wrap justify-between gap-4 mb-4">
-                        <div className="w-full sm:w-1/3">
-                            <label htmlFor="names">Nombres Completo *</label>
+                        <div className="w-full sm:w-5/12">
+                            <label htmlFor="names">Nombres completos *</label>
                             <InputField
                                 value={formValues.names}
                                 id="names"
@@ -245,8 +252,8 @@ export default function VotantesPage(){
                             />
                         </div>
 
-                        <div className="w-full sm:w-1/3">
-                            <label htmlFor="surnames">Apellidos Completo *</label>
+                        <div className="w-full sm:w-5/12">
+                            <label htmlFor="surnames">Apellidos completos *</label>
                             <InputField
                                 value={formValues.surnames}
                                 id="surnames"
@@ -257,8 +264,9 @@ export default function VotantesPage(){
                         </div>
                     </div>
 
+                    {/* Tercera fila */}
                     <div className="flex flex-wrap justify-between gap-4 mb-4">
-                        <div className="w-full sm:w-1/3">
+                        <div className="w-full sm:w-5/12">
                             <label htmlFor="status">Estado *</label>
                             <Select
                                 id="status"
@@ -270,7 +278,7 @@ export default function VotantesPage(){
                             />
                         </div>
 
-                        <div className="w-full sm:w-1/3">
+                        <div className="w-full sm:w-5/12">
                             <label htmlFor="chapter">Capitulo *</label>
                             <SelectChapter
                                 value={formValues.chapter}
@@ -282,20 +290,22 @@ export default function VotantesPage(){
                         </div>
                     </div>
 
+                    {/* Cuarta fila */}
                     <div className="flex flex-wrap justify-between gap-4 mb-4">
-                        <div className="w-full sm:w-1/3">
-                            <label htmlFor="status">Rol *</label>
+                        <div className="w-full sm:w-5/12">
+                            <label htmlFor="rol">Rol *</label>
                             <Select
                                 id="rol"
                                 name="rol"
                                 value={formValues.rol}
                                 onChange={handleChange}
                                 options={optionsRol}
+                                error={errors.rol}
                             />
                         </div>
 
-                        <div className="w-full sm:w-1/3">
-                            <label htmlFor="phone">Teléfono</label>
+                        <div className="w-full sm:w-5/12">
+                            <label htmlFor="phone">N° de celular</label>
                             <InputField
                                 value={formValues.phone}
                                 id="phone"
@@ -305,48 +315,55 @@ export default function VotantesPage(){
                         </div>
                     </div>
 
-                    <div className="w-full">
-                        <label htmlFor="address">Dirección</label>
-                        <InputField
-                            value={formValues.address}
-                            id="address"
-                            onChange={handleChange}
-                            type="text"
-                        />
-                    </div>
+                    {/* Quinta fila */}
+                    <div className="flex flex-wrap justify-between gap-4 mb-4">
+                        <div className="w-full sm:w-5/12">
+                            <label htmlFor="date_of_birth">Fecha de nacimiento *</label>
+                            <InputField
+                                value={formValues.date_of_birth}
+                                id="date_of_birth"
+                                onChange={handleChange}
+                                type="date"
+                                error={errors.date_of_birth}
+                            />
+                        </div>
 
-                    <div className="w-full">
-                        <label htmlFor="email">Correo Electrónico *</label>
-                        <InputField
-                            value={formValues.email}
-                            id="email"
-                            onChange={handleChange}
-                            type="email"
-                            error={errors.email}
-                        />
+                        <div className="w-full">
+                            <label htmlFor="email">Correo electrónico *</label>
+                            <InputField
+                                value={formValues.email}
+                                id="email"
+                                onChange={handleChange}
+                                type="email"
+                                error={errors.email}
+                            />
+                        </div>
                     </div>
+                    <p><b>(*) Son campos obligatorios</b></p>
 
+                    {/* Botones */}
                     <div className="flex justify-end gap-4 mt-4">
-                         <Button
-                              onClick={handleBackPage}
-                              width="w-1/6 sm:w-1/6"
-                              background="bg-amber-500"
-                              hovercolor="hover:bg-amber-600"
-                              type="button"
-                          >
-                             Volver
-                          </Button>
+                        <Button
+                            onClick={handleBackPage}
+                            width="w-1/6"
+                            background="bg-amber-500"
+                            hovercolor="hover:bg-amber-600"
+                            type="button"
+                        >
+                            Volver
+                        </Button>
                         <Button
                             type="submit"
-                             background="bg-blue-500"
-                             hovercolor="hover:bg-blue-700"
-                            width="w-1/6 sm:w-1/6"
+                            background="bg-blue-500"
+                            hovercolor="hover:bg-blue-700"
+                            width="w-1/6"
                         >
                             Guardar
                         </Button>
                     </div>
                 </form>
             </Card>
+
         </div>
     );
 }

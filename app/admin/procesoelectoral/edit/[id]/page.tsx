@@ -83,9 +83,9 @@ const Page: React.FC<PageProps> = ({ params }) => {
   };
 
     const options = [
-        { value: 'P', label: 'Pendiente' },
-        { value: 'E', label: 'En Proceso' },
-        { value: 'F', label: 'Finalizado' }
+      { value: 'P', label: 'VIGENTE' },
+      { value: 'E', label: 'EN PROCESO' },
+      { value: 'F', label: 'NO VIGENTE' }
     ];
 
     const handleSubmit = async (e: React.FormEvent) => {

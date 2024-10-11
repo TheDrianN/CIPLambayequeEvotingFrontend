@@ -100,6 +100,7 @@ const GrupoCandidatosDataTable = () => {
             name: 'ID',
             selector: row => row.id,
             sortable: true,
+            width: '80px',
         },
         {
             name: 'Sub Elección',
@@ -115,11 +116,13 @@ const GrupoCandidatosDataTable = () => {
             name: 'Número de Lista',
             selector: row => row.number_list,
             sortable: true,
+            width: '170px',
         },
         {
             name: 'Fecha de Creación',
             selector: row => new Date(row.created_at).toLocaleDateString(),
             sortable: true,
+            width: '170px',
         },
         {
             name: 'Acciones',
@@ -127,8 +130,8 @@ const GrupoCandidatosDataTable = () => {
                 <ActionButtons 
                     onEdit={() => handleEdit(row)} 
                     onDelete={() => handleDelete(row)} 
-                    showEdit={false}
-                    showDelete={false}
+                    showEdit={true}
+                    showDelete={true}
                     showView={false}
                 />
             ),

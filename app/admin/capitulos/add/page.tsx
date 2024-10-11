@@ -23,8 +23,8 @@ export default function VotantesPage(){
 
     
     const options = [
-        { value: 'H', label: 'Habilitado' },
-        { value: 'I', label: 'Inhabilitado' }
+        { value: 'V', label: 'VIGENTE' },
+        { value: 'I', label: 'NO VIGENTE' }
     ];
   
 
@@ -52,7 +52,7 @@ export default function VotantesPage(){
       // Validación
       const newErrors: typeof errors = {};
   
-      if (!formValues.names) newErrors.names = 'Nombre del Capitulo es obligatorio';
+      if (!formValues.names) newErrors.names = 'Nombre del capitulo es obligatorio';
       if (!formValues.status) newErrors.status = 'Estado es obligatorio';
 
       setErrors(newErrors);
@@ -63,7 +63,7 @@ export default function VotantesPage(){
       // Construir el objeto JSON
       const userData = {
         status: formValues.status,
-        name: formValues.names,
+        name: formValues.names.toUpperCase(),
       };
       console.log(userData);
 
@@ -121,14 +121,14 @@ export default function VotantesPage(){
     return (
         <div className="m-5">
             <div className="flex flex-wrap items-center justify-between">
-                <h1 className="text-lg font-medium sm:mb-0 sm:text-xl">Datos del Capitulo</h1>
+                <h1 className="text-lg font-medium sm:mb-0 sm:text-xl">Datos del capitulo</h1>
             </div>
             <hr />
             <Card className="flex-1 max-w-6xl mt-4 px-4">
                 <form onSubmit={handleSubmit}>
 
                     <div className="w-full ">
-                            <label htmlFor="names">Nombre del Capitulo *</label>
+                            <label htmlFor="names">Nombre del capitulo *</label>
                             <InputField
                                 value={formValues.names}
                                 id="names"
@@ -148,9 +148,9 @@ export default function VotantesPage(){
                                 options={options}
                                 error={errors.status}
                             />
-                        </div>
+                    </div>
 
-
+                    <p><b>(*) Son campos obligatorios</b></p>
                     <div className="flex justify-end gap-4 mt-4">
                          <Button
                               onClick={handleBackPage}

@@ -16,19 +16,19 @@ export default function VotantesPage(){
     };
 
     return (
-        <div className="m-5">
+        <div className="m-5 h-5/6">
           <div className="flex flex-wrap items-center justify-between mb-4">
-            <h1 className=" text-lg font-medium sm:mb-0 sm:text-xl">Gestionar Miembros Votantes</h1>
+            <h1 className=" text-lg font-medium sm:mb-0 sm:text-xl">Gestionar votantes</h1>
             <Button
               onClick={handleAddNewProceso}
               width="w-full sm:w-1/6"
               background="bg-green-500"
               hovercolor="hover:bg-green-700"
             >
-              <FontAwesomeIcon icon={faPlus} /> Agregar Nuevo Votante
+              <FontAwesomeIcon icon={faPlus} /> Agregar nuevo votante
             </Button>
           </div>
-          <hr />
+          <hr className="m-5 bg-black" />
           
           <MiembrosVotantesDataTable />
         </div>

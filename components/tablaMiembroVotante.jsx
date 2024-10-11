@@ -103,11 +103,13 @@ const MiembrosVotantesDataTable = () =>{
             name: 'ID',
             selector: row => row.id, // Muestra el título del proceso
             sortable: true,
+            width: '80px',
         },
         {
             name: 'N° Documento',
             selector: row => row.document, // Muestra el título del proceso
             sortable: true,
+            width: '160px',
         },
         {
           name: 'Nombres',
@@ -123,17 +125,15 @@ const MiembrosVotantesDataTable = () =>{
           name: 'Estado',
           selector: row => row.status, // Muestra el estado del proceso
           sortable: true,
+          width: '120px',
+
         },
         {
             name: 'Capitulo',
             selector: row => row.Chapter.name,
             sortable: true,
         },
-        {
-            name: 'Correo',
-            selector: row => row.email,
-            sortable: true,
-          },
+       ,
         
         {
           name: 'Acciones',

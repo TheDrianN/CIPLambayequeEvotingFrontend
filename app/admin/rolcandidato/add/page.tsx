@@ -67,7 +67,7 @@ export default function VotantesPage(){
       // Construir el objeto JSON
       const userData = {
         type: formValues.type,
-        name_type: formValues.name_type,
+        name_type: formValues.name_type.toUpperCase(),
         description: formValues.description,
       };
       console.log(userData);
@@ -127,14 +127,14 @@ export default function VotantesPage(){
     return (
         <div className="m-5">
             <div className="flex flex-wrap items-center justify-between">
-                <h1 className="text-lg font-medium sm:mb-0 sm:text-xl">Datos del Rol</h1>
+                <h1 className="text-lg font-medium sm:mb-0 sm:text-xl">Datos del rol</h1>
             </div>
             <hr />
             <Card className="flex-1 max-w-6xl mt-4 px-4">
                 <form onSubmit={handleSubmit}>
 
                     <div className="w-full sm:w-1/3">
-                            <label htmlFor="type">Tipo de Rol *</label>
+                            <label htmlFor="type">Tipo de rol *</label>
                             <Select
                                 id="type"
                                 name="type"
@@ -147,7 +147,7 @@ export default function VotantesPage(){
 
 
                     <div className="w-full ">
-                            <label htmlFor="name_type">Nombre del Rol *</label>
+                            <label htmlFor="name_type">Nombre del rol *</label>
                             <InputField
                                 value={formValues.name_type}
                                 id="name_type"
@@ -169,6 +169,8 @@ export default function VotantesPage(){
                         sizeY="py-3"
                         />
                     </div>
+                    
+                    <p><b>(*) Son campos obligatorios</b></p>
 
 
                     <div className="flex justify-end gap-4 mt-4">

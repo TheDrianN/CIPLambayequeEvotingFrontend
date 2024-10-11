@@ -1,44 +1,57 @@
 'use client';
-
 import React, { useState } from 'react';
 import Card from "../components/Card";
 import InputField from "../components/InputField";
-import ErrorMessage from "../components/ErrorMessage";
 import Button from '../components/Button';
+import Cookies from 'js-cookie'; // Librería para manejar cookies
 
 const Login = () => {
   const [step, setStep] = useState(1);
-  const [colegiatura, setColegiatura] = useState(''); // Estado para el número de colegiatura
-  const [codigo, setCodigo] = useState('#123AD90'); // Estado para el código de validación
+  const [colegiatura, setColegiatura] = useState('');
   const [contraseña, setContraseña] = useState('');
-  const [colegiaturaError, setColegiaturaError] = useState(''); // Estado para el error de colegiatura
-  const [contraseñaError, setContraseñaError] = useState(''); // Estado para el error de contraseña
+  const [colegiaturaError, setColegiaturaError] = useState('');
+  const [codigo, setCodigo] = useState('#123AD90'); // Estado para el código de validación
+  const [contraseñaError, setContraseñaError] = useState('');
   const [codigoError, setCodigoError] = useState(''); // Estado para el error del código
-  const [error, setError] = useState(''); // Estado para manejar errores generales
+  const [error, setError] = useState('');
 
-  const handleLogin = () => {
-    let isValid = true;
-
+  const handleLogin = async () => {
     // Resetear errores
     setColegiaturaError('');
     setContraseñaError('');
     setError('');
 
-    // Validación de prueba con valores estáticos
-    if (colegiatura !== '12345') {
-      setColegiaturaError('Número de colegiatura incorrecto');
-      isValid = false;
-    }
+    try {
+      // Solicitud a la API para autenticación
+      const response = await fetch('http://localhost:3000/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          document:colegiatura,
+          password: contraseña,
+        }),
+      });
 
-    if (contraseña !== '123') {
-      setContraseñaError('Contraseña Incorrecta');
-      isValid = false;
-    }
+      const data = await response.json();
 
-    if (isValid) {
-      setStep(2); // Cambia a la segunda tarjeta
-    } else {
-      setError('Verificar Datos'); // Mensaje de error general
+      console.log(data)
+
+      if (response.ok) {
+        // Almacenar el access_token en una cookie
+        Cookies.set('access_token', data.access_token, {
+          expires: 1, // La cookie expirará en 1 día
+          secure: true, // La cookie solo se enviará a través de conexiones HTTPS
+          sameSite: 'Strict',
+        });
+
+        setStep(2); // Cambiar al siguiente paso
+      } else {
+        setError(data.message || 'Error al iniciar sesión');
+      }
+    } catch (err) {
+      setError('Error de red o servidor');
     }
   };
 

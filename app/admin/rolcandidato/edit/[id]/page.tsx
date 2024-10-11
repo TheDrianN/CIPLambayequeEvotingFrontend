@@ -93,7 +93,7 @@ const Page: React.FC<PageProps> = ({ params }) => {
         // Construir el objeto JSON
         const userData = {
           type: formValues.type,
-          name_type: formValues.name_type,
+          name_type: formValues.name_type.toUpperCase(),
           description: formValues.description,
         };
         console.log(userData);

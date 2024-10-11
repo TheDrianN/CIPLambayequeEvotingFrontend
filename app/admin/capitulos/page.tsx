@@ -16,16 +16,16 @@ export default function VotantesPage(){
     };
 
     return (
-        <div className="m-5">
+        <div className="m-5 h-5/6">
           <div className="flex flex-wrap items-center justify-between mb-4">
-            <h1 className=" text-lg font-medium sm:mb-0 sm:text-xl">Gestionar Capitulos</h1>
+            <h1 className=" text-lg font-medium sm:mb-0 sm:text-xl">Gestionar capitulos</h1>
             <Button
               onClick={handleAddNewProceso}
               width="w-full sm:w-1/6"
               background="bg-green-500"
               hovercolor="hover:bg-green-700"
             >
-              <FontAwesomeIcon icon={faPlus} /> Agregar Nuevo Capitulo
+              <FontAwesomeIcon icon={faPlus} /> Agregar nuevo capitulo
             </Button>
           </div>
           <hr />

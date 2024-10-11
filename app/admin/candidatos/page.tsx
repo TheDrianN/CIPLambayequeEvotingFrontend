@@ -16,9 +16,9 @@ export default function VotantesPage(){
     };
 
     return (
-        <div className="m-5">
+        <div className="m-5 h-5/6">
           <div className="flex flex-wrap items-center justify-between mb-4">
-            <h1 className=" text-lg font-medium sm:mb-0 sm:text-xl">Gestionar Lista de Grupos de Candidatos</h1>
+            <h1 className=" text-lg font-medium sm:mb-0 sm:text-xl">Gestionar lista de grupos de candidatos</h1>
             <Button
               onClick={handleAddNewProceso}
               width="w-full sm:w-1/6"

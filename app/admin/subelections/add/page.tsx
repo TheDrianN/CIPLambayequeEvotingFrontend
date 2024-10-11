@@ -55,7 +55,7 @@ export default function Page(){
           description: formValues.description,
           chapter_id: formValues.chapter,
           election_id: formValues.election,
-          title: formValues.title
+          title: formValues.title.toUpperCase()
         };
         console.log(userData);
     
@@ -167,7 +167,7 @@ export default function Page(){
                   sizeY="py-3"
                 />
               </div>
-    
+              <p><b>(*) Son campos obligatorios</b></p>
               <div className="flex justify-end gap-4 mt-4">
                 <Button
                   onClick={handleBackPage}

@@ -112,7 +112,7 @@ export default function Page(){
             const groupPayload = {
                 sub_election_id: parseInt(formValues.subelection),
                 number_list: formValues.lista,
-                img: null
+                img: ""
             };
     
             console.log('Enviando datos del grupo de candidatos:', groupPayload);
@@ -182,7 +182,7 @@ export default function Page(){
 
       <Card className="flex-1  mt-4 px-4">
         <div className="w-full sm:w-1/3">
-            <label htmlFor='start_date'>Sub Elección</label>
+            <label htmlFor='start_date'>Sub elección</label>
             <SelectSubElections
             id='subelection'
              name="subelection"

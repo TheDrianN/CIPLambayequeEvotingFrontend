@@ -7,6 +7,8 @@ interface SubElection {
   title: string;
 }
 
+
+
 interface SelectSubElectionsProps extends Omit<SelectProps, 'options'> {}
 
 const SelectSubElections: React.FC<SelectSubElectionsProps> = (props) => {
@@ -16,7 +18,7 @@ const SelectSubElections: React.FC<SelectSubElectionsProps> = (props) => {
   useEffect(() => {
     const fetchDataChapter = async () => {
       try {
-        const response = await fetch('http://localhost:3000/api/sub-elections/subelectionsbystatus/1');
+        const response = await fetch('http://localhost:3000/api/sub-elections/subelectionsbystatus');
         const responseData = await response.json();
         console.log('Datos recibidos:', responseData);
         setOptions(responseData.data); // Asumiendo que los capítulos están en responseData.data

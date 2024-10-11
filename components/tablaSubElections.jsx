@@ -8,7 +8,7 @@ import Swal from 'sweetalert2';
 // Función para obtener subelecciones basadas en el ID de la elección
 const fetchSubElections = async (electionId) => {
     try {
-        const response = await fetch(`http://localhost:3000/api/elections/${electionId}/subelections`);
+        const response = await fetch(`http://localhost:3000/api/elections/subelections/${electionId}`);
         const responseData = await response.json();
         console.log('Datos recibidos2:', responseData); // Imprime los datos en la consola
         return responseData.data; // Devuelve solo la lista de datos
@@ -136,6 +136,7 @@ const SubElectionsDataTable = () => {
             name: 'ID',
             selector: row => row.id, // Muestra el ID del subelection
             sortable: true,
+            width:'80px',
         },
         {
             name: 'Elección',

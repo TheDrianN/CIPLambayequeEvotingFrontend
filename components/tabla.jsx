@@ -13,13 +13,15 @@ const customStyles = {
   },
   rows: {
     style: {
-      fontSize: '14px',
+      fontSize: '14px', 
     },
   },
   tableWrapper: {
     style: {
       display: 'block', // Esto asegura que el scroll horizontal se muestre en pantallas pequeñas
       overflowX: 'auto',
+      maxWidth: '100%', // Ajusta el ancho máximo a toda la pantalla disponible
+      width: '100%', // Asegura que el elemento ocupe todo el ancho disponible
     },
   },
 };
@@ -49,7 +51,7 @@ const CustomDataTable = ({ columns, data }) => {
   };
 
   return (
-    <Card>
+    <Card className=" h-full">
       <div className="mt-3">
         <InputField 
           type="text"
@@ -66,6 +68,8 @@ const CustomDataTable = ({ columns, data }) => {
             customStyles={customStyles}
             pagination
             fixedHeader
+            
+            
             striped
             compact
             paginationComponentOptions={{
@@ -74,6 +78,7 @@ const CustomDataTable = ({ columns, data }) => {
               noRowsPerPage: true,
             }}
             noDataComponent="No hay datos disponibles"
+            
           />
         </div>
       </div>

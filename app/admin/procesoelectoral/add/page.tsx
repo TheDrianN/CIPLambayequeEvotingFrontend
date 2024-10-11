@@ -26,9 +26,9 @@ export default function Page(){
   });
   
   const options = [
-    { value: 'P', label: 'Pendiente' },
-    { value: 'E', label: 'En Proceso' },
-    { value: 'F', label: 'Finalizado' }
+    { value: 'P', label: 'VIGENTE' },
+    { value: 'E', label: 'EN PROCESO' },
+    { value: 'F', label: 'NO VIGENTE' }
   ];
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -74,7 +74,8 @@ export default function Page(){
       start_date: isoStartDate,
       end_date: isoEndDate,
       status: formValues.status,
-      title: formValues.title
+      title: formValues.title.toUpperCase(),
+      number_voters:'',
     };
     console.log(userData);
 
@@ -132,14 +133,14 @@ export default function Page(){
   return (
     <div className="m-5">
       <div className="flex flex-wrap items-center justify-between ">
-        <h1 className=" text-lg font-medium sm:mb-0 sm:text-xl">Datos Generales</h1>
+        <h1 className=" text-lg font-medium sm:mb-0 sm:text-xl">Datos del proceso electoral</h1>
       </div>
       <hr />
       <Card className="flex-1 max-w-6xl mt-4 px-4">
         <form onSubmit={handleSubmit}>
           <div className="flex flex-wrap justify-between gap-4 mb-4">
             <div className='w-full sm:w-1/3'>
-              <label htmlFor='start_date'>Fecha y Hora de Inicio:</label>
+              <label htmlFor='start_date'>Fecha y hora de inicio:</label>
               <InputField
                 value={formValues.start_date}
                 id='start_date'
@@ -150,7 +151,7 @@ export default function Page(){
             </div>
 
             <div className='w-full sm:w-1/3'>
-              <label htmlFor='end_date'>Fecha y Hora de Fin:</label>
+              <label htmlFor='end_date'>Fecha y hora de fin:</label>
               <InputField
                 value={formValues.end_date}
                 id='end_date'
@@ -198,7 +199,7 @@ export default function Page(){
               sizeY="py-3"
             />
           </div>
-
+          <p><b>(*) Son campos obligatorios</b></p>
           <div className="flex justify-end gap-4 mt-4">
             <Button
               onClick={handleBackPage}

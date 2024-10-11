@@ -142,7 +142,7 @@ export default function AdminLayout({ children }) {
                 </div>
             </nav>
 
-            <main className="flex-1 p-4 bg-gray-100">
+            <main className="w-full flex-1 p-4 bg-slate-100">
                 {children}
             </main>
         </div>
