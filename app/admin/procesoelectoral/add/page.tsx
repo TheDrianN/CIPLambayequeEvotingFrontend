@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import Card from "../../../../components/Card";
 import Button from "../../../../components/Button";
 import InputField from "../../../../components/InputField";
@@ -7,9 +7,14 @@ import Select from "../../../../components/Select";
 import Swal from 'sweetalert2';
 import { useRouter } from 'next/navigation';
 import config from '../../../../config';
+import Cookies from 'js-cookie';  // Importar js-cookie para manejar las cookies
+import jwt_decode from 'jsonwebtoken';  // Importar jsonwebtoken para decodificar el token JWT
+
 
 export default function Page(){
   const router = useRouter();
+  const [ tokenAccess, setTokenAccess] = useState('');
+  const [authorized, setAuthorized] = useState(false);  // Para controlar si el usuario está autorizado
 
   const [formValues, setFormValues] = useState({
     description: '',
@@ -31,6 +36,40 @@ export default function Page(){
     { value: 'E', label: 'EN PROCESO' },
     { value: 'F', label: 'NO VIGENTE' }
   ];
+
+  useEffect(() => {
+    const token = Cookies.get('access_token');  // Obtener el token de la cookie
+  
+    if (token) {
+        setTokenAccess(token)
+      try {
+        // Decodificar el token directamente con jwt_decode
+        const decodedToken = jwt_decode.decode(token);
+  
+        // Verificar si `decodedToken` no es null
+        if (decodedToken && typeof decodedToken === 'object') {
+          // Verificar si el rol es "V"
+          if (decodedToken.role === 'A') {
+            setAuthorized(true);  // Usuario autorizado
+          } else if (decodedToken.role === 'V') {
+            router.push('/voters/home');
+          } else {
+            setAuthorized(false);  // Si hay un error, no está autorizado
+            router.push('/404');  // Redirigir si no es autorizado
+          }
+        } else {
+          // Si `decodedToken` es null o no es un objeto válido
+          setAuthorized(false);
+          router.push('/404');  // Redirigir en caso de error
+        }
+      } catch (error) {
+        router.push('/404');  // Redirigir en caso de error
+      }
+    } else {
+      router.push('/');  // Redirigir si no hay token
+    }
+  }, [router]);  // Asegúrate de incluir router en las dependencias
+  
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target;
@@ -86,6 +125,7 @@ export default function Page(){
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${tokenAccess}`,  // Enviar el token en la cabecera de autorización
         },
         body: JSON.stringify(userData),
       });
@@ -131,6 +171,10 @@ export default function Page(){
     }
   };
 
+  if (!authorized) {
+    return <p>Acceso denegado. No tienes permiso para ver esta página.</p>;
+  }
+  
   return (
     <div className="m-5">
       <div className="flex flex-wrap items-center justify-between ">

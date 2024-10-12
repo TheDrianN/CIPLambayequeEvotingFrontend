@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Select, { SelectProps } from './Select';
 import config from '../config';
+import Cookies from 'js-cookie';  // Importar js-cookie para manejar las cookies
 
 
 interface SubElection {
@@ -17,9 +18,16 @@ const SelectSubElections: React.FC<SelectSubElectionsProps> = (props) => {
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
+    const token = Cookies.get('access_token');  // Obtener el token de la cookie
     const fetchDataChapter = async () => {
       try {
-        const response = await fetch(`${config.apiBaseUrl}/api/sub-elections/subelectionsbystatus`);
+        const response = await fetch(`${config.apiBaseUrl}/api/sub-elections/subelectionsbystatus`,{
+          method: 'GET',  // Método GET para obtener datos
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,  // Enviar el token en la cabecera de autorización
+          },
+        });
         const responseData = await response.json();
         console.log('Datos recibidos:', responseData);
         setOptions(responseData.data); // Asumiendo que los capítulos están en responseData.data

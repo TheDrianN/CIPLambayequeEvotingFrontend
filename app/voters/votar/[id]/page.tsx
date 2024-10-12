@@ -5,6 +5,9 @@ import { faUser } from '@fortawesome/free-solid-svg-icons';
 import Swal from 'sweetalert2';
 import Bowser from 'bowser'; // Importar Bowser para detectar el navegador
 import config from '../../../../config';
+import Cookies from 'js-cookie';  // Importar js-cookie para manejar las cookies
+import jwt_decode from 'jsonwebtoken';  // Importar jsonwebtoken para decodificar el token JWT
+import { useRouter } from 'next/navigation';
 
 // Tipado para SubElection
 interface SubElection {
@@ -19,9 +22,15 @@ interface Candidate {
 }
 
 // Función para obtener subelecciones
-const fetchDataSubElections = async (id: string): Promise<SubElection[]> => {
+const fetchDataSubElections = async (id: string, access_token:string): Promise<SubElection[]> => {
   try {
-    const response = await fetch(`${config.apiBaseUrl}/api/elections/findSubelectionChapter?election_id=${id}&chapter_id=1`);
+    const response = await fetch(`${config.apiBaseUrl}/api/elections/findSubelectionChapter?election_id=${id}&chapter_id=1`,{
+      method: 'GET',  // Método GET para obtener datos
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${access_token}`,  // Enviar el token en la cabecera de autorización
+      },
+    });
     const responseData = await response.json();
     
     return responseData.data && responseData.data.length > 0 ? responseData.data[0].subElections || [] : [];
@@ -32,9 +41,15 @@ const fetchDataSubElections = async (id: string): Promise<SubElection[]> => {
 };
 
 // Función para obtener candidatos por subelección
-const fetchCandidatesForSubElection = async (subElectionId: number): Promise<Candidate[]> => {
+const fetchCandidatesForSubElection = async (subElectionId: number, access_token:string): Promise<Candidate[]> => {
   try {
-    const response = await fetch(`${config.apiBaseUrl}/api/group-candidates/findAllCandidatesSubElection/${subElectionId}`);
+    const response = await fetch(`${config.apiBaseUrl}/api/group-candidates/findAllCandidatesSubElection/${subElectionId}`,{
+      method: 'GET',  // Método GET para obtener datos
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${access_token}`,  // Enviar el token en la cabecera de autorización
+      },
+    });
     const responseData = await response.json();
     
     return responseData.data && responseData.data.length > 0 ? responseData.data : [];
@@ -51,16 +66,59 @@ const Page: React.FC<{ params: { id: string } }> = ({ params }) => {
   const [isConfirmationVisible, setIsConfirmationVisible] = useState(false); // Mostrar la página de confirmación
   const [candidatesBySubElection, setCandidatesBySubElection] = useState<{ [key: number]: Candidate[] }>({});
   const [latitud, setlatitud] = useState<number | null>(null);
+  const [ tokenAccess, setTokenAccess] = useState('');
+  const [authorized, setAuthorized] = useState(false);  // Para controlar si el usuario está autorizado
   const [longitud, setlongitud] = useState<number | null>(null);
+  const router = useRouter();
+
+  
+  useEffect(() => {
+    const token = Cookies.get('access_token');  // Obtener el token de la cookie
+  
+    if (token) {
+      try {
+        // Decodificar el token directamente con jwt_decode
+        const decodedToken = jwt_decode.decode(token);
+  
+        // Verificar si `decodedToken` no es null
+        if (decodedToken && typeof decodedToken === 'object') {
+          setTokenAccess(token);
+          
+          // Verificar si el rol es "V"
+          if (decodedToken.role === 'V') {
+            setAuthorized(true);  // Usuario autorizado
+          } else if (decodedToken.role === 'A') {
+            router.push('/admin/procesoelectoral');
+          } else {
+            setAuthorized(false);  // Si hay un error, no está autorizado
+            router.push('/404');  // Redirigir si no es autorizado
+          }
+        } else {
+          // Si `decodedToken` es null o no es un objeto válido
+          setAuthorized(false);
+          router.push('/404');  // Redirigir en caso de error
+        }
+      } catch (error) {
+        router.push('/404');  // Redirigir en caso de error
+      }
+    } else {
+      router.push('/');  // Redirigir si no hay token
+    }
+  }, [router]);  // Asegúrate de incluir router en las dependencias
+
+  if (!authorized) {
+    return <p>Acceso denegado. No tienes permiso para ver esta página.</p>;
+  }
+
 
   // Obtener las subelecciones
   useEffect(() => {
     const fetchSubElections = async () => {
-      const result = await fetchDataSubElections(params.id);
+      const result = await fetchDataSubElections(params.id,tokenAccess);
       setSubElections(result);
 
       result.forEach(async (subElection: SubElection) => {
-        const candidates = await fetchCandidatesForSubElection(subElection.id);
+        const candidates = await fetchCandidatesForSubElection(subElection.id,tokenAccess);
 
         // Agregar la opción de Voto en Blanco con id 0
         candidates.push({
@@ -185,6 +243,7 @@ const Page: React.FC<{ params: { id: string } }> = ({ params }) => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${tokenAccess}`,  // Enviar el token en la cabecera de autorización
         },
         body: JSON.stringify(electionDetails),
       });
@@ -216,6 +275,7 @@ const Page: React.FC<{ params: { id: string } }> = ({ params }) => {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${tokenAccess}`,  // Enviar el token en la cabecera de autorización
           },
           body: JSON.stringify(vote),
         });

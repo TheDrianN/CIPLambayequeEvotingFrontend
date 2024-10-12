@@ -4,11 +4,18 @@ import ActionButtons from "./ActionButtons"
 import { useRouter } from 'next/navigation';
 import Swal from 'sweetalert2';
 import config from '../config';
+import Cookies from 'js-cookie';  // Importar js-cookie para manejar las cookies
 
 // Función para obtener datos de la API
-const fetchData = async () => {
+const fetchData = async (access_token) => {
     try {
-      const response = await fetch(`${config.apiBaseUrl}/api/type-candidates?limit=10&page=1`);
+      const response = await fetch(`${config.apiBaseUrl}/api/type-candidates?limit=10&page=1`,{
+        method: 'GET',  // Método GET para obtener datos
+        headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${access_token}`,  // Enviar el token en la cabecera de autorización
+        },
+      });
       const responseData = await response.json();
       return responseData.data; // Devuelve solo la lista de datos
     } catch (error) {
@@ -23,12 +30,15 @@ const TypeCandidatesDataTable = () =>{
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true); // Estado de carga
     const [error, setError] = useState(null); // Estado de error
-  
+    const [ tokenAccess, setTokenAccess] = useState(null);
+
     useEffect(() => {
+        const token = Cookies.get('access_token');  // Obtener el token de la cookie
+        setTokenAccess(token)
         // Función para obtener datos y actualizar el estado
         const getData = async () => {
             try {
-                const data = await fetchData();
+                const data = await fetchData(tokenAccess);
                 setData(data);
             } catch (error) {
                 setError(error);
@@ -66,6 +76,8 @@ const TypeCandidatesDataTable = () =>{
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${tokenAccess}`,  // Enviar el token en la cabecera de autorización
+
                 },
             });
 

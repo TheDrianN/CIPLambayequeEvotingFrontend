@@ -7,6 +7,8 @@ import Select from "../../../../../components/Select";
 import { useRouter } from 'next/navigation';
 import Swal from 'sweetalert2';
 import config from '../../../../../config';
+import Cookies from 'js-cookie';  // Importar js-cookie para manejar las cookies
+import jwt_decode from 'jsonwebtoken';  // Importar jsonwebtoken para decodificar el token JWT
 
 interface PageProps {
   params: {
@@ -34,7 +36,43 @@ const Page: React.FC<PageProps> = ({ params }) => {
   });
 
   const router = useRouter();
+  const [ tokenAccess, setTokenAccess] = useState('');
+  const [authorized, setAuthorized] = useState(false);  // Para controlar si el usuario está autorizado
 
+  useEffect(() => {
+    const token = Cookies.get('access_token');  // Obtener el token de la cookie
+  
+    if (token) {
+        setTokenAccess(token)
+      try {
+        // Decodificar el token directamente con jwt_decode
+        const decodedToken = jwt_decode.decode(token);
+  
+        // Verificar si `decodedToken` no es null
+        if (decodedToken && typeof decodedToken === 'object') {
+          // Verificar si el rol es "V"
+          if (decodedToken.role === 'A') {
+            setAuthorized(true);  // Usuario autorizado
+          } else if (decodedToken.role === 'V') {
+            router.push('/voters/home');
+          } else {
+            setAuthorized(false);  // Si hay un error, no está autorizado
+            router.push('/404');  // Redirigir si no es autorizado
+          }
+        } else {
+          // Si `decodedToken` es null o no es un objeto válido
+          setAuthorized(false);
+          router.push('/404');  // Redirigir en caso de error
+        }
+      } catch (error) {
+        router.push('/404');  // Redirigir en caso de error
+      }
+    } else {
+      router.push('/');  // Redirigir si no hay token
+    }
+  }, [router]);  // Asegúrate de incluir router en las dependencias
+  
+  
   const formatDateTimeForInput = (dateTime: string): string => {
     const date = new Date(dateTime);
     // Formatear a `YYYY-MM-DDTHH:MM`
@@ -47,10 +85,19 @@ const Page: React.FC<PageProps> = ({ params }) => {
     return `${year}-${month}-${day}T${hours}:${minutes}`;
   };
 
+ 
+
   // Función para obtener los datos de la API y llenar el formulario
   const fetchData = async () => {
     try {
-      const response = await fetch(`${config.apiBaseUrl}/api/elections/` + params.id);
+      const response = await fetch(`${config.apiBaseUrl}/api/elections/` + params.id,{
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${tokenAccess}`,  // Enviar el token en la cabecera de autorización
+
+        },
+      });
       const responseData = await response.json();
       const data = responseData.data;
   
@@ -129,6 +176,7 @@ const Page: React.FC<PageProps> = ({ params }) => {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${tokenAccess}`,  // Enviar el token en la cabecera de autorización
                 },
                 body: JSON.stringify(userData),
             });
@@ -175,6 +223,10 @@ const Page: React.FC<PageProps> = ({ params }) => {
   const handleBackPage = () => {
     router.push('/admin/procesoelectoral');
   };
+
+  if (!authorized) {
+    return <p>Acceso denegado. No tienes permiso para ver esta página.</p>;
+}
 
   return (
     <div className="m-5">

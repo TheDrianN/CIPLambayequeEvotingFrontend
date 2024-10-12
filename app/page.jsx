@@ -1,19 +1,51 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import Card from "../components/Card";
 import InputField from "../components/InputField";
 import Button from '../components/Button';
 import Cookies from 'js-cookie'; // Librería para manejar cookies
+import config from '../config';
+import jwt_decode from 'jsonwebtoken';
+import { useRouter } from 'next/navigation';
 
 const Login = () => {
   const [step, setStep] = useState(1);
   const [colegiatura, setColegiatura] = useState('');
   const [contraseña, setContraseña] = useState('');
   const [colegiaturaError, setColegiaturaError] = useState('');
-  const [codigo, setCodigo] = useState('#123AD90'); // Estado para el código de validación
+  const [codigoVerificado, setCodigoVerificado] = useState(''); // Estado para el código de validación
+  const [codigo, setCodigo] = useState(''); // Estado para el código de validación
   const [contraseñaError, setContraseñaError] = useState('');
   const [codigoError, setCodigoError] = useState(''); // Estado para el error del código
   const [error, setError] = useState('');
+
+  const router = useRouter();
+
+  useEffect(() => {
+    const token = Cookies.get('access_token');  // Obtener el token de la cookie
+  
+    if (token) {
+      try {
+        // Decodificar el token directamente con jwt_decode
+        const decodedToken = jwt_decode.decode(token);
+        // Verificar si el rol es "V"
+        if (decodedToken.role === 'V') {
+          router.push('/voters/home');
+
+        }else if(decodedToken.role =='A'){
+
+          router.push('/admin/procesoelectoral');
+        } else {
+
+          router.push('/404');  // Redirigir si no es autorizado
+        }
+      } catch (error) {
+        router.push('/404');  // Redirigir en caso de error
+      }
+    } else {
+      router.push('/');  // Redirigir si no hay token
+    }
+  }, [router]);  // Asegúrate de incluir router en las dependencias
 
   const handleLogin = async () => {
     // Resetear errores
@@ -23,7 +55,7 @@ const Login = () => {
 
     try {
       // Solicitud a la API para autenticación
-      const response = await fetch('http://localhost:3000/api/auth/login', {
+      const response = await fetch(`${config.apiBaseUrl}/api/auth/validation`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -39,12 +71,7 @@ const Login = () => {
       console.log(data)
 
       if (response.ok) {
-        // Almacenar el access_token en una cookie
-        Cookies.set('access_token', data.access_token, {
-          expires: 1, // La cookie expirará en 1 día
-          secure: true, // La cookie solo se enviará a través de conexiones HTTPS
-          sameSite: 'Strict',
-        });
+        setCodigoVerificado(data.data)
 
         setStep(2); // Cambiar al siguiente paso
       } else {
@@ -55,15 +82,65 @@ const Login = () => {
     }
   };
 
-  const handleCodigoValidacion = () => {
-    if (codigo !== '#123AD90') {
+  const handleCodigoValidacion = async () => {
+    if (codigo !== codigoVerificado) {
       setCodigoError('Código incorrecto');
       setError('Código incorrecto'); // Mensaje de error general
     } else {
-      alert('Validación exitosa!');
+     
       setCodigoError(''); // Resetea el error
       setError(''); // Resetea el error general
+
+      try {
+        // Solicitud a la API para autenticación
+        const response = await fetch(`${config.apiBaseUrl}/api/auth/login`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            document:colegiatura,
+            password: contraseña,
+          }),
+        });
+  
+        const data = await response.json();
+  
+        console.log(data)
+  
+        if (response.ok) {
+           
+
+            Cookies.set('access_token', data.access_token, {
+              expires: 1, // La cookie expirará en 1 día
+              secure: true, // La cookie solo se enviará a través de conexiones HTTPS
+              sameSite: 'Strict',
+            });
+
+             
+            const decodedToken = jwt_decode.decode(data.access_token);
+
+            if(decodedToken.role =='V'){
+              router.push('/voters/home');
+
+            }else if(decodedToken.role =='A'){
+              router.push('/admin/procesoelectoral');
+            }else{
+              router.push('/404');
+            }
+
+
+
+
+        } else {
+          setError(data.message || 'Error al iniciar sesión');
+        }
+      } catch (err) {
+        setError('Error de red o servidor');
+      }
     }
+
+    
   };
 
   return (
@@ -73,7 +150,7 @@ const Login = () => {
           <div className="flex justify-between items-center mb-3">
             <div>
               <h2 className="text-2xl font-bold mb-4">Bienvenido</h2>
-              <p className="mb-4">Ingresa tus datos</p>
+              <p className="mb-4">Ingresa tus credenciales</p>
             </div>
 
             <div className="text-center mb-4">
@@ -111,12 +188,18 @@ const Login = () => {
           <div className="flex justify-between items-center mb-3">
             <div>
               <h2 className="text-2xl font-bold mb-4">Bienvenido</h2>
-              <p className="mb-4">Ingresa tus datos</p>
+              
             </div>
 
             <div className="text-center mb-4">
               <img src="https://www.cip.org.pe/images/LOGO_CIP.png" alt="Logo" className="mx-auto w-20 h-20" />
             </div>
+            
+          </div>
+
+          <div>
+          <p className="mb-4">Ingresa el codigo de verificación enviado a su correo, tiene duracion de 1 minutos</p>
+              
           </div>
 
           <InputField
@@ -128,6 +211,9 @@ const Login = () => {
             onChange={(e) => setCodigo(e.target.value)}
             error={codigoError}
           />
+          <p className="text-sm text-blue-500 cursor-pointer mb-5" onClick={handleLogin}>
+                ¿No recibiste el código? <span className="underline">Reenviar código</span>
+              </p>
 
           <Button onClick={handleCodigoValidacion}>Validar</Button>
         </Card>

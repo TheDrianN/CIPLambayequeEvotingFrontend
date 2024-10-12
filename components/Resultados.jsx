@@ -2,15 +2,22 @@ import React, { useState, useEffect } from 'react';
 import BarChart from './BarChart'; // El gráfico de barras
 import SelectElections from './SelectElections'; // Selección de elecciones
 import Select from './Select'; // Selección para subelecciones
-import Swal from 'sweetalert2';
+import Cookies from 'js-cookie';  // Importar js-cookie para manejar las cookies
 import Card from './Card';
+import config from '../config';
 
 // Función para obtener subelecciones basadas en el ID de la elección
-const fetchSubElections = async (electionId) => {
+const fetchSubElections = async (electionId,access_token) => {
   try {
-    const response = await fetch(`${config.apiBaseUrl}/api/elections/subelections/${electionId}`);
+    const response = await fetch(`${config.apiBaseUrl}/api/elections/subelections/${electionId}`,{
+      method: 'GET',  // Método GET para obtener datos
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${access_token}`,  // Enviar el token en la cabecera de autorización
+      },
+    });
     const responseData = await response.json();
-    return responseData.data;
+    return responseData;
   } catch (error) {
     console.error('Error fetching subelections data:', error);
     return [];
@@ -18,9 +25,15 @@ const fetchSubElections = async (electionId) => {
 };
 
 // Función simulada para obtener resultados
-const fetchResultados = async (electionId) => {
+const fetchResultados = async (electionId,access_token) => {
   try {
-    const response = await fetch(`${config.apiBaseUrl}/api/voting/${electionId}`);
+    const response = await fetch(`${config.apiBaseUrl}/api/voting/${electionId}`,{
+      method: 'GET',  // Método GET para obtener datos
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${access_token}`,  // Enviar el token en la cabecera de autorización
+      },
+    });
     const responseData = await response.json();
    
     return responseData.data;
@@ -35,20 +48,43 @@ const ResultadosElection = () => {
   const [selectedElection, setSelectedElection] = useState('');
   const [subElections, setSubElections] = useState([]);
   const [selectedSubElection, setSelectedSubElection] = useState('');
+  const [ tokenAccess, setTokenAccess] = useState('');
   const [resultsData, setResultsData] = useState(null);
 
+  useEffect(() => {
+    const token = Cookies.get('access_token');  // Obtener el token de la cookie
+  
+    if (token) {
+        setTokenAccess(token);
+    } 
+  }, []);
   // Cargar subelecciones cuando se selecciona una elección
   useEffect(() => {
-    if (selectedElection) {
-      fetchSubElections(selectedElection).then((data) => {
-        const formattedOptions = data.map((subElection) => ({
-          label: subElection.title,
-          value: subElection.id,
-        }));
-        setSubElections(formattedOptions);
-      });
+    if (selectedElection && tokenAccess) {
+    
+      fetchSubElections(selectedElection, tokenAccess)
+        .then((response) => {
+          const data = response.data;  // Accedemos al campo `data`
+          console.log('Datos crudos recibidos:', data);  // Imprimir los datos crudos para verificar
+  
+          if (data && data.length > 0) {
+            const formattedOptions = data.map((subElection) => ({
+              label: subElection.title,  // Usamos `subElection.title` para las etiquetas
+              value: subElection.id,  // Usamos `subElection.id` como valor
+            }));
+            console.log('Opciones formateadas:', formattedOptions);  // Verificar que las opciones estén correctas
+            setSubElections(formattedOptions);  // Guardar las opciones formateadas en el estado
+          } else {
+            console.log('No hay datos disponibles para las subelecciones.');  // Si no hay datos
+            setSubElections([]);
+          }
+        })
+        .catch((error) => {
+          console.error('Error fetching subElections:', error);  // Manejo de error
+          setSubElections([]);  // En caso de error, también mostrar vacío
+        });
     }
-  }, [selectedElection]);
+  }, [selectedElection, tokenAccess]);  // Dependencias
 
   const handleElectionChange = (e) => {
     setSelectedElection(e.target.value);
@@ -63,7 +99,7 @@ const ResultadosElection = () => {
   const handleVerResultados = async () => {
     try {
       // Llamamos a la función asincrónica y esperamos su resolución
-      const fakeResults = await fetchResultados(selectedSubElection);
+      const fakeResults = await fetchResultados(selectedSubElection,tokenAccess);
   
       // Actualizamos el estado con los resultados obtenidos
       setResultsData(fakeResults);

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Select, { SelectProps } from './Select';
 import config from '../config';
+import Cookies from 'js-cookie';  // Importar js-cookie para manejar las cookies
 
 interface TypeCandidates {
   id: string;
@@ -18,10 +19,17 @@ const SelectTypeCandidates: React.FC<SelectTypeCandidatesProps> = ({ tipoCargo, 
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
+    const token = Cookies.get('access_token');  // Obtener el token de la cookie
     const fetchData = async () => {
       if (!tipoCargo) return;  // Si no hay tipo seleccionado, no se hace la petición
       try {
-        const response = await fetch(`${config.apiBaseUrl}/api/type-candidates/bytype/${tipoCargo}`);
+        const response = await fetch(`${config.apiBaseUrl}/api/type-candidates/bytype/${tipoCargo}`,{
+          method: 'GET',  // Método GET para obtener datos
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,  // Enviar el token en la cabecera de autorización
+          },
+        });
         const responseData = await response.json();
         setOptions(responseData.data);
         setLoading(false);

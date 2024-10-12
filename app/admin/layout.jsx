@@ -2,14 +2,70 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import '../globals.css';
+import Cookies from 'js-cookie';  // Importar js-cookie para manejar las cookies
+import jwt_decode from 'jsonwebtoken';  // Importar jsonwebtoken para decodificar el token JWT
+import config from '../../config';
 
+const fetchUser = async (userid, access_token) => {
+    try {
+      const response = await fetch(`${config.apiBaseUrl}/api/users/` + userid, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${access_token}`,
+        },
+      });
+      const responseData = await response.json();
+      console.log(responseData)
+      return responseData.data;
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+      return null;
+    }
+  };
 export default function AdminLayout({ children }) {
     // Cargar la ruta activa desde localStorage o usar la ruta por defecto
     const [activeLink, setActiveLink] = useState('/admin/procesoelectoral');
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [name, setName] = useState('');
+    const [loading, setLoading] = useState(true);  // Estado de carga
+    const [error, setError] = useState(null);      // Estado de error
 
     useEffect(() => {
         // Obtener el valor de activeLink desde localStorage al montar el componente
+        const token = Cookies.get('access_token');  // Obtener el token de la cookie
+        if (!token) {
+        setError('No se encontró el token de acceso');
+        setLoading(false);
+        return;
+        }
+
+        let decodedToken;
+        try {
+        decodedToken = jwt_decode.decode(token);  // Decodificar el token correctamente
+        } catch (err) {
+        setError('Error al decodificar el token');
+        setLoading(false);
+        return;
+        }
+
+        const getData = async () => {
+        try {
+            const data = await fetchUser(decodedToken.sub, token);
+            if (data) {
+            setName(`${data.names} ${data.surnames}`);
+            } else {
+            setError('Error al obtener los datos del usuario');
+            }
+        } catch (err) {
+            setError('Error al obtener los datos del usuario');
+        } finally {
+            setLoading(false);  // Finalizar la carga
+        }
+        };
+
+        getData();
+
         const storedActiveLink = localStorage.getItem('activeLink');
         if (storedActiveLink) {
             setActiveLink(storedActiveLink);
@@ -135,7 +191,13 @@ export default function AdminLayout({ children }) {
                     </li>
                 </ul>
                 <div className="mt-auto">
-                    <p className="text-center mb-2">Nombre del Usuario</p>
+                        {loading ? (
+                                <p className="text-center mb-2">Cargando...</p>
+                            ) : error ? (
+                                <p className="text-center mb-2">{error}</p>
+                            ) : (
+                                <p className="text-center mb-2">{name}</p>
+                            )}
                     <button className="block mx-auto p-2 rounded bg-red-700 hover:bg-red-800">
                         Cerrar Sesión
                     </button>

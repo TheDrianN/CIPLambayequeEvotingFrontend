@@ -10,6 +10,9 @@ import { faKey } from '@fortawesome/free-solid-svg-icons';
 import { useRouter } from 'next/navigation';
 import Swal from 'sweetalert2';
 import config from '../../../../../config';
+import Cookies from 'js-cookie';  // Importar js-cookie para manejar las cookies
+import jwt_decode from 'jsonwebtoken';  // Importar jsonwebtoken para decodificar el token JWT
+
 
 interface PageProps {
   params: {
@@ -24,11 +27,12 @@ const Page: React.FC<PageProps> = ({ params }) => {
     surnames: '',
     status: '',
     chapter: '',
-    address: '',
     rol:'',
+    date_of_birth:'',
     email: '',
     phone: '',
-    password: ''
+    password: '',
+    newpassword:''
   });
 
   const [errors, setErrors] = useState({
@@ -39,15 +43,58 @@ const Page: React.FC<PageProps> = ({ params }) => {
     chapter: '',
     rol: '',
     email: '',
-    password: ''
+    date_of_birth:''
   });
 
   const router = useRouter();
+ const [ tokenAccess, setTokenAccess] = useState('');
+  const [authorized, setAuthorized] = useState(false);  // Para controlar si el usuario está autorizado
 
+  useEffect(() => {
+    const token = Cookies.get('access_token');  // Obtener el token de la cookie
+  
+    if (token) {
+        setTokenAccess(token)
+      try {
+        // Decodificar el token directamente con jwt_decode
+        const decodedToken = jwt_decode.decode(token);
+  
+        // Verificar si `decodedToken` no es null
+        if (decodedToken && typeof decodedToken === 'object') {
+          // Verificar si el rol es "V"
+          if (decodedToken.role === 'A') {
+            setAuthorized(true);  // Usuario autorizado
+          } else if (decodedToken.role === 'V') {
+            router.push('/voters/home');
+          } else {
+            setAuthorized(false);  // Si hay un error, no está autorizado
+            router.push('/404');  // Redirigir si no es autorizado
+          }
+        } else {
+          // Si `decodedToken` es null o no es un objeto válido
+          setAuthorized(false);
+          router.push('/404');  // Redirigir en caso de error
+        }
+      } catch (error) {
+        router.push('/404');  // Redirigir en caso de error
+      }
+    } else {
+      router.push('/');  // Redirigir si no hay token
+    }
+  }, [router]);  // Asegúrate de incluir router en las dependencias
+  
+  
   // Función para obtener los datos de la API y llenar el formulario
   const fetchData = async () => {
     try {
-      const response = await fetch(`${config.apiBaseUrl}/api/users/` + params.id);
+      const response = await fetch(`${config.apiBaseUrl}/api/users/` + params.id,{
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${tokenAccess}`,  // Enviar el token en la cabecera de autorización
+
+        },
+      });
       const responseData = await response.json();
       const data = responseData.data;
       console.log(responseData)
@@ -59,11 +106,12 @@ const Page: React.FC<PageProps> = ({ params }) => {
         surnames: data.surnames || '',
         status: data.status || '',
         chapter: data.chapter_id || '',
-        address: data.address || '',
+        date_of_birth: data.date_of_birth ? new Date(data.date_of_birth).toISOString().split('T')[0] : '',
         rol: data.rol || '',
         email: data.email || '',
         phone: data.phone || '',
-        password: data.password || ''
+        password: data.password || '',
+        newpassword:''
       });
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -102,7 +150,7 @@ const Page: React.FC<PageProps> = ({ params }) => {
             rol:'',
             chapter: '',
             email: '',
-            password: ''
+            date_of_birth:''
         });
   
   
@@ -116,15 +164,17 @@ const Page: React.FC<PageProps> = ({ params }) => {
         if (!formValues.status) newErrors.status = 'Estado es obligatorio';
         if (!formValues.chapter) newErrors.chapter = 'Capítulo es obligatorio';
         if (!formValues.email) newErrors.email = 'Correo electrónico es obligatorio';
-        if (!formValues.password) newErrors.password = 'Contraseña es obligatoria';
+        if (!formValues.date_of_birth) newErrors.date_of_birth = 'Fecha de cumpleaños es obligatoria';
     
         setErrors(newErrors);
     
         // Si hay errores, no enviar el formulario
         if (Object.keys(newErrors).length > 0) return;
-    
-        // Construir el objeto JSON
-        const userData = {
+
+        let userData = {}; // Cambia `const` por `let`
+
+        if (formValues.newpassword === '') {
+          userData = {
             chapter_id: Number(formValues.chapter),
             document: formValues.document,
             password: formValues.password,
@@ -134,10 +184,26 @@ const Page: React.FC<PageProps> = ({ params }) => {
             surnames: formValues.surnames,
             phone: formValues.phone,
             email: formValues.email,
-            address: formValues.address,
             code_access: '', // Si no hay `code_access`, se envía como cadena vacía
-        };
-        console.log(userData);
+          };
+        } else {
+          userData = { // Solo asigna, no vuelvas a declararla
+            chapter_id: Number(formValues.chapter),
+            document: formValues.document,
+            password: formValues.newpassword,
+            status: formValues.status,
+            rol: formValues.rol,
+            names: formValues.names,
+            surnames: formValues.surnames,
+            phone: formValues.phone,
+            email: formValues.email,
+            code_access: '', // Si no hay `code_access`, se envía como cadena vacía
+          };
+        }
+    
+        // Construir el objeto JSON
+       
+        
   
   
           // Enviar datos a la API
@@ -146,12 +212,13 @@ const Page: React.FC<PageProps> = ({ params }) => {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${tokenAccess}`,  // Enviar el token en la cabecera de autorización
                 },
                 body: JSON.stringify(userData),
             });
         
             const responseBody = await response.json(); // Obtener el cuerpo de la respuesta
-        
+            console.log(responseBody);
             if (response.ok) {
               Swal.fire({
                   icon: 'success',
@@ -206,7 +273,7 @@ const Page: React.FC<PageProps> = ({ params }) => {
 
   const handleAddNewPass = () => {
     const newPassword = generatePassword(12);
-    setFormValues({ ...formValues, password: newPassword });
+    setFormValues({ ...formValues, newpassword: newPassword });
     console.log('Nueva contraseña generada:', newPassword);
   };
 
@@ -214,167 +281,184 @@ const Page: React.FC<PageProps> = ({ params }) => {
     router.push('/admin/votantes');
   };
 
+  if (!authorized) {
+    return <p>Acceso denegado. No tienes permiso para ver esta página.</p>;
+}
+
+
   return (
     <div className="m-5">
-      <div className="flex flex-wrap items-center justify-between">
-        <h1 className="text-lg font-medium sm:mb-0 sm:text-xl">Datos del Votante</h1>
-      </div>
-      <hr />
-      <Card className="flex-1 max-w-6xl mt-4 px-4">
-        <form onSubmit={handleSubmit}>
-            <div className="flex flex-wrap justify-between gap-4 mb-4">
-                <div className="w-full sm:w-1/3">
-                    <label htmlFor="document">N° Documento Identidad / Codigo Colegiatura *</label>
-                    <InputField
-                        value={formValues.document}
-                        id="document"
-                        onChange={handleChange}
-                        type="text"
-                        error={errors.document}
-                    />
-                </div>
+        <div className="flex flex-wrap items-center justify-between">
+            <h1 className="text-lg font-medium sm:mb-0 sm:text-xl">Datos del votante</h1>
+        </div>
+        <hr />
+        <Card className="flex-1 max-w-full mt-4 px-6">
+            <form onSubmit={handleSubmit}>
+                {/* Primera fila */}
+                <div className="flex flex-wrap justify-between gap-1 mb-4">
+                    <div className="w-full sm:w-5/12">
+                        <label htmlFor="document">N° Documento identidad / Codigo colegiatura *</label>
+                        <InputField
+                            value={formValues.document}
+                            id="document"
+                            onChange={handleChange}
+                            type="text"
+                            error={errors.document}
+                        />
+                    </div>
 
-                <div className="w-full sm:w-1/3">
-                    <label htmlFor="password">Cambiar Contraseña</label>
-                    <div className='flex flex-row items-center'>
-                        <div className="w-full">
-                            <InputField
-                                value={formValues.password}
-                                id="password"
-                                onChange={handleChange}
-                                type="text"
-                                error={errors.password}
-                            />
+                    <div className="w-full sm:w-5/12">
+                        <label htmlFor="password">Cambiar contraseña</label>
+                        <div className="flex items-center">
+                            <div className="w-5/6">
+                                <InputField
+                                    value={formValues.newpassword}
+                                    id="newpassword"
+                                    onChange={handleChange}
+                                    type="text"
+                                    
+                                />
+                            </div>
+                            <Button
+                                onClick={handleAddNewPass}
+                                width="w-1/6"
+                                background="bg-neutral-500"
+                                hovercolor="hover:bg-neutral-700"
+                                type="button"
+                            >
+                                <FontAwesomeIcon icon={faKey} />
+                            </Button>
                         </div>
-                        <Button
-                            onClick={handleAddNewPass}
-                            width="w-1/6 sm:w-1/6"
-                            background="bg-neutral-500"
-                            hovercolor="hover:bg-neutral-700"
-                            type="button"
-                        >
-                            <FontAwesomeIcon icon={faKey} />
-                        </Button>
                     </div>
                 </div>
-            </div>
 
-            <div className="flex flex-wrap justify-between gap-4 mb-4">
-                <div className="w-full sm:w-1/3">
-                    <label htmlFor="names">Nombres Completo *</label>
-                    <InputField
-                        value={formValues.names}
-                        id="names"
-                        onChange={handleChange}
-                        type="text"
-                        error={errors.names}
-                    />
+                {/* Segunda fila */}
+                <div className="flex flex-wrap justify-between gap-4 mb-4">
+                    <div className="w-full sm:w-5/12">
+                        <label htmlFor="names">Nombres completos *</label>
+                        <InputField
+                            value={formValues.names}
+                            id="names"
+                            onChange={handleChange}
+                            type="text"
+                            error={errors.names}
+                        />
+                    </div>
+
+                    <div className="w-full sm:w-5/12">
+                        <label htmlFor="surnames">Apellidos completos *</label>
+                        <InputField
+                            value={formValues.surnames}
+                            id="surnames"
+                            onChange={handleChange}
+                            type="text"
+                            error={errors.surnames}
+                        />
+                    </div>
                 </div>
 
-                <div className="w-full sm:w-1/3">
-                    <label htmlFor="surnames">Apellidos Completo *</label>
-                    <InputField
-                        value={formValues.surnames}
-                        id="surnames"
-                        onChange={handleChange}
-                        type="text"
-                        error={errors.surnames}
-                    />
-                </div>
-            </div>
+                {/* Tercera fila */}
+                <div className="flex flex-wrap justify-between gap-4 mb-4">
+                    <div className="w-full sm:w-5/12">
+                        <label htmlFor="status">Estado *</label>
+                        <Select
+                            id="status"
+                            name="status"
+                            value={formValues.status}
+                            onChange={handleChange}
+                            options={options}
+                            error={errors.status}
+                        />
+                    </div>
 
-            <div className="flex flex-wrap justify-between gap-4 mb-4">
-                <div className="w-full sm:w-1/3">
-                    <label htmlFor="status">Estado *</label>
-                    <Select
-                        id="status"
-                        name="status"
-                        value={formValues.status}
-                        onChange={handleChange}
-                        options={options}
-                        error={errors.status}
-                    />
-                </div>
-
-                <div className="w-full sm:w-1/3">
-                    <label htmlFor="chapter">Capitulo *</label>
-                    <SelectChapter
-                        value={formValues.chapter}
-                        id="chapter"
-                        name="chapter"
-                        onChange={handleChange}
-                        error={errors.chapter}
-                    />
-                </div>
-            </div>
-
-            <div className="flex flex-wrap justify-between gap-4 mb-4">
-                <div className="w-full sm:w-1/3">
-                    <label htmlFor="status">Rol *</label>
-                    <Select
-                        id="rol"
-                        name="rol"
-                        value={formValues.rol}
-                        onChange={handleChange}
-                        options={optionsRol}
-                    />
+                    <div className="w-full sm:w-5/12">
+                        <label htmlFor="chapter">Capitulo *</label>
+                        <SelectChapter
+                            value={formValues.chapter}
+                            id="chapter"
+                            name="chapter"
+                            onChange={handleChange}
+                            error={errors.chapter}
+                        />
+                    </div>
                 </div>
 
-                <div className="w-full sm:w-1/3">
-                    <label htmlFor="phone">Teléfono</label>
-                    <InputField
-                        value={formValues.phone}
-                        id="phone"
-                        onChange={handleChange}
-                        type="text"
-                    />
+                {/* Cuarta fila */}
+                <div className="flex flex-wrap justify-between gap-4 mb-4">
+                    <div className="w-full sm:w-5/12">
+                        <label htmlFor="rol">Rol *</label>
+                        <Select
+                            id="rol"
+                            name="rol"
+                            value={formValues.rol}
+                            onChange={handleChange}
+                            options={optionsRol}
+                            error={errors.rol}
+                        />
+                    </div>
+
+                    <div className="w-full sm:w-5/12">
+                        <label htmlFor="phone">N° de celular</label>
+                        <InputField
+                            value={formValues.phone}
+                            id="phone"
+                            onChange={handleChange}
+                            type="text"
+                        />
+                    </div>
                 </div>
-            </div>
 
-            <div className="w-full">
-                <label htmlFor="address">Dirección</label>
-                <InputField
-                    value={formValues.address}
-                    id="address"
-                    onChange={handleChange}
-                    type="text"
-                />
-            </div>
+                {/* Quinta fila */}
+                <div className="flex flex-wrap justify-between gap-4 mb-4">
+                    <div className="w-full sm:w-5/12">
+                        <label htmlFor="date_of_birth">Fecha de nacimiento *</label>
+                        <InputField
+                            value={formValues.date_of_birth}
+                            id="date_of_birth"
+                            onChange={handleChange}
+                            type="date"
+                            error={errors.date_of_birth}
+                        />
+                    </div>
 
-            <div className="w-full">
-                <label htmlFor="email">Correo Electrónico *</label>
-                <InputField
-                    value={formValues.email}
-                    id="email"
-                    onChange={handleChange}
-                    type="email"
-                    error={errors.email}
-                />
-            </div>
+                    <div className="w-full">
+                        <label htmlFor="email">Correo electrónico *</label>
+                        <InputField
+                            value={formValues.email}
+                            id="email"
+                            onChange={handleChange}
+                            type="email"
+                            error={errors.email}
+                        />
+                    </div>
+                </div>
+                <p><b>(*) Son campos obligatorios</b></p>
 
-            <div className="flex justify-end gap-4 mt-4">
+                {/* Botones */}
+                <div className="flex justify-end gap-4 mt-4">
                     <Button
                         onClick={handleBackPage}
-                        width="w-1/6 sm:w-1/6"
+                        width="w-1/6"
                         background="bg-amber-500"
                         hovercolor="hover:bg-amber-600"
                         type="button"
                     >
                         Volver
                     </Button>
-                <Button
-                    type="submit"
+                    <Button
+                        type="submit"
                         background="bg-blue-500"
                         hovercolor="hover:bg-blue-700"
-                    width="w-1/6 sm:w-1/6"
-                >
-                    Guardar
-                </Button>
-            </div>
-        </form>
-      </Card>
+                        width="w-1/6"
+                    >
+                        Guardar
+                    </Button>
+                </div>
+            </form>
+        </Card>
+
     </div>
-  );
+);
 };
 
 export default Page;

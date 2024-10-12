@@ -1,6 +1,5 @@
 'use client'
 import React, { useState, useEffect } from "react";
-import InputField from "../../../../../components/InputField";
 import Button from "../../../../../components/Button";
 import Card from "../../../../../components/Card";
 import Select from "../../../../../components/Select";
@@ -12,6 +11,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import SelectSubElections from "@/components/SelectSubElection";
 import config from '../../../../../config';
+import Cookies from 'js-cookie';  // Importar js-cookie para manejar las cookies
+import jwt_decode from 'jsonwebtoken';  // Importar jsonwebtoken para decodificar el token JWT
 
 interface PageProps {
   params: {
@@ -49,11 +50,55 @@ const Page: React.FC<PageProps> = ({ params }) => {
   const [modalOpen, setModalOpen] = useState(false); // Estado para controlar el modal
   const [miembrosObtenidos, setMiembrosObtenidos] = useState<MiembrosObtenidos[]>([]); // Guarda los user_id y candidateId originales
   const router = useRouter();
+  const [ tokenAccess, setTokenAccess] = useState('');
+  const [authorized, setAuthorized] = useState(false);  // Para controlar si el usuario está autorizado
+
+  useEffect(() => {
+    const token = Cookies.get('access_token');  // Obtener el token de la cookie
+  
+    if (token) {
+        setTokenAccess(token)
+      try {
+        // Decodificar el token directamente con jwt_decode
+        const decodedToken = jwt_decode.decode(token);
+  
+        // Verificar si `decodedToken` no es null
+        if (decodedToken && typeof decodedToken === 'object') {
+          // Verificar si el rol es "V"
+          if (decodedToken.role === 'A') {
+            setAuthorized(true);  // Usuario autorizado
+          } else if (decodedToken.role === 'V') {
+            router.push('/voters/home');
+          } else {
+            setAuthorized(false);  // Si hay un error, no está autorizado
+            router.push('/404');  // Redirigir si no es autorizado
+          }
+        } else {
+          // Si `decodedToken` es null o no es un objeto válido
+          setAuthorized(false);
+          router.push('/404');  // Redirigir en caso de error
+        }
+      } catch (error) {
+        router.push('/404');  // Redirigir en caso de error
+      }
+    } else {
+      router.push('/');  // Redirigir si no hay token
+    }
+  }, [router]);  // Asegúrate de incluir router en las dependencias
+  
+
 
   // Función para obtener los datos de la API y llenar el formulario
   const fetchData = async () => {
     try {
-      const response = await fetch(`${config.apiBaseUrl}/api/group-candidates/` + params.id);
+      const response = await fetch(`${config.apiBaseUrl}/api/group-candidates/` + params.id,{
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${tokenAccess}`,  // Enviar el token en la cabecera de autorización
+
+        },
+      });
       const responseData = await response.json();
       const data = responseData.data;
 
@@ -168,6 +213,7 @@ const Page: React.FC<PageProps> = ({ params }) => {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${tokenAccess}`,  // Enviar el token en la cabecera de autorización
         },
         body: JSON.stringify(groupPayload),
       });
@@ -191,6 +237,9 @@ const Page: React.FC<PageProps> = ({ params }) => {
       const deleteCandidatesPromises = deletedCandidates.map(async (m) => {
         const responseDelete = await fetch(`${config.apiBaseUrl}/api/candidates/${m.candidateId}`, {
           method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${tokenAccess}`,  // Enviar el token en la cabecera de autorización
+        },
         });
 
         if (!responseDelete.ok) {
@@ -210,6 +259,7 @@ const Page: React.FC<PageProps> = ({ params }) => {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${tokenAccess}`,  // Enviar el token en la cabecera de autorización
           },
           body: JSON.stringify(candidatePayload),
         });
@@ -229,6 +279,11 @@ const Page: React.FC<PageProps> = ({ params }) => {
       Swal.fire('Error', 'Ocurrió un error al actualizar el grupo de candidatos o los miembros.', 'error');
     }
   };
+
+
+  if (!authorized) {
+      return <p>Acceso denegado. No tienes permiso para ver esta página.</p>;
+  }
 
   return (
     <div className="m-5">

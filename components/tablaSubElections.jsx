@@ -5,11 +5,18 @@ import { useRouter } from 'next/navigation';
 import SelectElections from './SelectElections';
 import Swal from 'sweetalert2';
 import config from '../config';
+import Cookies from 'js-cookie';  // Importar js-cookie para manejar las cookies
 
 // Función para obtener subelecciones basadas en el ID de la elección
-const fetchSubElections = async (electionId) => {
+const fetchSubElections = async (electionId,access_token) => {
     try {
-        const response = await fetch(`${config.apiBaseUrl}/api/elections/subelections/${electionId}`);
+        const response = await fetch(`${config.apiBaseUrl}/api/elections/subelections/${electionId}`,{
+            method: 'GET',  // Método GET para obtener datos
+            headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${access_token}`,  // Enviar el token en la cabecera de autorización
+            },
+        });
         const responseData = await response.json();
         console.log('Datos recibidos2:', responseData); // Imprime los datos en la consola
         return responseData.data; // Devuelve solo la lista de datos
@@ -20,9 +27,15 @@ const fetchSubElections = async (electionId) => {
 };
 
 // Función para obtener datos iniciales (e.g., todas las elecciones)
-const fetchData = async () => {
+const fetchData = async (access_token) => {
     try {
-        const response = await fetch(`${config.apiBaseUrl}/api/sub-elections?limit=10&page=1`);
+        const response = await fetch(`${config.apiBaseUrl}/api/sub-elections?limit=10&page=1`,{
+            method: 'GET',  // Método GET para obtener datos
+            headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${access_token}`,  // Enviar el token en la cabecera de autorización
+            },
+        });
         const responseData = await response.json();
         console.log('Datos recibidosA:', responseData.data); // Imprime los datos en la consola
         return responseData.data; // Devuelve solo la lista de datos
@@ -38,8 +51,13 @@ const SubElectionsDataTable = () => {
     const [loading, setLoading] = useState(true); // Estado de carga
     const [error, setError] = useState(null); // Estado de error
     const [selectedElection, setSelectedElection] = useState(''); // Estado para el ID de la elección seleccionada
+    const [ tokenAccess, setTokenAccess] = useState('');
 
+    useEffect(() => {
+        const token = Cookies.get('access_token');  // Obtener el token de la cookie
+        setTokenAccess(token);
 
+      }, []);  // Asegúrate de incluir router en las dependencias
 
     // Función para manejar el cambio en el select de elecciones
     const handleElectionChange = async (electionId) => {
@@ -48,7 +66,7 @@ const SubElectionsDataTable = () => {
         console.log('select', election_Id)
         setLoading(true); // Iniciar carga cuando se selecciona una nueva elección
         try {
-            const data = await fetchSubElections(election_Id);
+            const data = await fetchSubElections(election_Id,tokenAccess);
             setData(data);
         } catch (error) {
             setError(error);
@@ -61,7 +79,7 @@ const SubElectionsDataTable = () => {
         // Función para obtener datos y actualizar el estado
         const getInitialData = async () => {
             try {
-                const data = await fetchData();
+                const data = await fetchData(tokenAccess);
                 setData(data); // Asignar las elecciones a un estado para el select
             } catch (error) {
                 setError(error);
@@ -98,6 +116,7 @@ const SubElectionsDataTable = () => {
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${tokenAccess}`,  // Enviar el token en la cabecera de autorización
                     },
                 });
 
