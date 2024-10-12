@@ -6,7 +6,7 @@ import Card from "../../../../../components/Card";
 import Select from "../../../../../components/Select";
 import { useRouter } from 'next/navigation';
 import Swal from 'sweetalert2';
-
+import config from '../../../../../config';
 
 interface PageProps {
   params: {
@@ -30,7 +30,7 @@ const Page: React.FC<PageProps> = ({ params }) => {
   // Función para obtener los datos de la API y llenar el formulario
   const fetchData = async () => {
     try {
-      const response = await fetch('http://localhost:3000/api/chapters/' + params.id);
+      const response = await fetch(`${config.apiBaseUrl}/api/chapters/` + params.id);
       const responseData = await response.json();
       const data = responseData.data;
       console.log(responseData)
@@ -101,7 +101,7 @@ const Page: React.FC<PageProps> = ({ params }) => {
   
           // Enviar datos a la API
           try {
-            const response = await fetch('http://localhost:3000/api/chapters/'+params.id, { // Reemplaza '/api/endpoint' con la URL de tu API
+            const response = await fetch(`${config.apiBaseUrl}/api/chapters/` + params.id, { // Reemplaza '/api/endpoint' con la URL de tu API
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',

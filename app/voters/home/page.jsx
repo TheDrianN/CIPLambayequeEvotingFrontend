@@ -3,11 +3,12 @@ import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheckToSlot, faLaptopMedical, faChartColumn, faClipboardQuestion } from "@fortawesome/free-solid-svg-icons";
 import { useRouter } from 'next/navigation';
+import config from '../../../../config';
 
 // Función para obtener datos iniciales (e.g., todas las elecciones)
 const fetchData = async () => {
   try {
-    const response = await fetch('http://localhost:3000/api/elections/findElectionstatusP');
+    const response = await fetch(`${config.apiBaseUrl}/api/elections/findElectionstatusP`);
     const responseData = await response.json();
     
     console.log('Datos recibidos:', responseData);

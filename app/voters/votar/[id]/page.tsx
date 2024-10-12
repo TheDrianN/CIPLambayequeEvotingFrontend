@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser } from '@fortawesome/free-solid-svg-icons';
 import Swal from 'sweetalert2';
 import Bowser from 'bowser'; // Importar Bowser para detectar el navegador
+import config from '../../../../config';
 
 // Tipado para SubElection
 interface SubElection {
@@ -20,7 +21,7 @@ interface Candidate {
 // Función para obtener subelecciones
 const fetchDataSubElections = async (id: string): Promise<SubElection[]> => {
   try {
-    const response = await fetch(`http://localhost:3000/api/elections/findSubelectionChapter?election_id=${id}&chapter_id=1`);
+    const response = await fetch(`${config.apiBaseUrl}/api/elections/findSubelectionChapter?election_id=${id}&chapter_id=1`);
     const responseData = await response.json();
     
     return responseData.data && responseData.data.length > 0 ? responseData.data[0].subElections || [] : [];
@@ -33,7 +34,7 @@ const fetchDataSubElections = async (id: string): Promise<SubElection[]> => {
 // Función para obtener candidatos por subelección
 const fetchCandidatesForSubElection = async (subElectionId: number): Promise<Candidate[]> => {
   try {
-    const response = await fetch(`http://localhost:3000/api/group-candidates/findAllCandidatesSubElection/${subElectionId}`);
+    const response = await fetch(`${config.apiBaseUrl}/api/group-candidates/findAllCandidatesSubElection/${subElectionId}`);
     const responseData = await response.json();
     
     return responseData.data && responseData.data.length > 0 ? responseData.data : [];
@@ -180,7 +181,7 @@ const Page: React.FC<{ params: { id: string } }> = ({ params }) => {
       console.log(electionDetails);
   
       // Enviar la primera solicitud POST a /api/vote-status
-      const responseStatus = await fetch('http://localhost:3000/api/vote-status', {
+      const responseStatus = await fetch(`${config.apiBaseUrl}/api/vote-status`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -211,7 +212,7 @@ const Page: React.FC<{ params: { id: string } }> = ({ params }) => {
   
       // Enviar los votos por cada subelección
       const votePromises = votes.subelection.map(async (vote) => {
-        const responseVote = await fetch('http://localhost:3000/api/voting', {
+        const responseVote = await fetch(`${config.apiBaseUrl}/api/voting`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

@@ -4,11 +4,12 @@ import ActionButtons from "./ActionButtons";
 import { useRouter } from 'next/navigation';
 import SelectElections from './SelectElections';
 import Swal from 'sweetalert2';
+import config from '../config';
 
 // Función para obtener subelecciones basadas en el ID de la elección
 const fetchSubElections = async (electionId) => {
     try {
-        const response = await fetch(`http://localhost:3000/api/elections/subelections/${electionId}`);
+        const response = await fetch(`${config.apiBaseUrl}/api/elections/subelections/${electionId}`);
         const responseData = await response.json();
         console.log('Datos recibidos2:', responseData); // Imprime los datos en la consola
         return responseData.data; // Devuelve solo la lista de datos
@@ -21,7 +22,7 @@ const fetchSubElections = async (electionId) => {
 // Función para obtener datos iniciales (e.g., todas las elecciones)
 const fetchData = async () => {
     try {
-        const response = await fetch('http://localhost:3000/api/sub-elections?limit=10&page=1');
+        const response = await fetch(`${config.apiBaseUrl}/api/sub-elections?limit=10&page=1`);
         const responseData = await response.json();
         console.log('Datos recibidosA:', responseData.data); // Imprime los datos en la consola
         return responseData.data; // Devuelve solo la lista de datos
@@ -93,7 +94,7 @@ const SubElectionsDataTable = () => {
         if (result.isConfirmed) {
             try {
                 // Enviar solicitud a la API para eliminar
-                const response = await fetch(`http://localhost:3000/api/elections/${row.id}`, {
+                const response = await fetch(`${config.apiBaseUrl}/api/elections/${row.id}`, {
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json',

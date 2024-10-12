@@ -8,7 +8,7 @@ import Card from './Card';
 // Función para obtener subelecciones basadas en el ID de la elección
 const fetchSubElections = async (electionId) => {
   try {
-    const response = await fetch(`http://localhost:3000/api/elections/subelections/${electionId}`);
+    const response = await fetch(`${config.apiBaseUrl}/api/elections/subelections/${electionId}`);
     const responseData = await response.json();
     return responseData.data;
   } catch (error) {
@@ -20,7 +20,7 @@ const fetchSubElections = async (electionId) => {
 // Función simulada para obtener resultados
 const fetchResultados = async (electionId) => {
   try {
-    const response = await fetch(`http://localhost:3000/api/voting/${electionId}`);
+    const response = await fetch(`${config.apiBaseUrl}/api/voting/${electionId}`);
     const responseData = await response.json();
    
     return responseData.data;

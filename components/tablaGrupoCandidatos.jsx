@@ -3,11 +3,12 @@ import CustomDataTable from "./tabla"; // Asegúrate de que la ruta sea correcta
 import ActionButtons from "./ActionButtons"
 import { useRouter } from 'next/navigation';
 import Swal from 'sweetalert2';
+import config from '../config';
 
 // Función para obtener datos de la API
 const fetchData = async () => {
     try {
-      const response = await fetch('http://localhost:3000/api/group-candidates?limit=10&page=1');
+      const response = await fetch(`${config.apiBaseUrl}/api/group-candidates?limit=10&page=1`);
       const responseData = await response.json();
       console.log('Datos recibidos:', responseData); // Imprime los datos en la consola
       return responseData.data; // Devuelve solo la lista de datos
@@ -60,7 +61,7 @@ const GrupoCandidatosDataTable = () => {
         if (result.isConfirmed) {
             try {
                 // Enviar solicitud a la API para eliminar
-                const response = await fetch(`http://localhost:3000/api/group-candidates/${row.id}`, {
+                const response = await fetch(`${config.apiBaseUrl}/api/group-candidates/${row.id}`, {
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json',

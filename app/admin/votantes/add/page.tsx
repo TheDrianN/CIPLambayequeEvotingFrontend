@@ -9,7 +9,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faKey } from '@fortawesome/free-solid-svg-icons';
 import Swal from 'sweetalert2';
 import { useRouter } from 'next/navigation';
-
+import config from '../../../../config';
 
 export default function VotantesPage(){
     const [formValues, setFormValues] = useState({
@@ -137,7 +137,7 @@ export default function VotantesPage(){
 
         // Enviar datos a la API
         try {
-          const response = await fetch('http://localhost:3000/api/users', { // Reemplaza '/api/endpoint' con la URL de tu API
+          const response = await fetch(`${config.apiBaseUrl}/api/users`, { // Reemplaza '/api/endpoint' con la URL de tu API
               method: 'POST',
               headers: {
                   'Content-Type': 'application/json',

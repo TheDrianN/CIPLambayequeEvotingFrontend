@@ -7,6 +7,7 @@ import SelectElections from "../../../../../components/SelectElections";
 import SelectChapter from "../../../../../components/SelectChapter"; 
 import Swal from 'sweetalert2';
 import { useRouter } from 'next/navigation';
+import config from '../../../../../config';
 
 interface PageProps {
     params: {
@@ -32,7 +33,7 @@ const Page: React.FC<PageProps> = ({ params }) => {
     // Función para obtener los datos de la API y llenar el formulario
     const fetchData = async () => {
         try {
-        const response = await fetch('http://localhost:3000/api/sub-elections/' + params.id);
+        const response = await fetch(`${config.apiBaseUrl}/api/sub-elections/` + params.id);
         const responseData = await response.json();
         const data = responseData.data;
         console.log("hola",responseData.data)
@@ -91,7 +92,7 @@ const Page: React.FC<PageProps> = ({ params }) => {
     
         // Enviar datos a la API
         try {
-          const response = await fetch('http://localhost:3000/api/sub-elections/'+params.id, { // Reemplaza esta URL por la correcta
+          const response = await fetch(`${config.apiBaseUrl}/api/sub-elections/`+params.id, { // Reemplaza esta URL por la correcta
             method: 'PATCH',
             headers: {
               'Content-Type': 'application/json',

@@ -7,7 +7,7 @@ import SelectElections from "../../../../components/SelectElections";
 import SelectChapter from "../../../../components/SelectChapter"; 
 import Swal from 'sweetalert2';
 import { useRouter } from 'next/navigation';
-
+import config from '../../../../config';
 
 export default function Page(){
     const router = useRouter();
@@ -61,7 +61,7 @@ export default function Page(){
     
         // Enviar datos a la API
         try {
-          const response = await fetch('http://localhost:3000/api/sub-elections', { // Reemplaza esta URL por la correcta
+          const response = await fetch(`${config.apiBaseUrl}/api/sub-elections`, { // Reemplaza esta URL por la correcta
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

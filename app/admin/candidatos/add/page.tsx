@@ -10,6 +10,7 @@ import Swal from 'sweetalert2';
 import { useRouter } from 'next/navigation';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTrash } from '@fortawesome/free-solid-svg-icons'; // Importa el ícono
+import config from '../../../../config';
 
 interface Miembro {
     id: string;
@@ -117,7 +118,7 @@ export default function Page(){
     
             console.log('Enviando datos del grupo de candidatos:', groupPayload);
     
-            const responseGroup = await fetch('http://localhost:3000/api/group-candidates', {
+            const responseGroup = await fetch(`${config.apiBaseUrl}/api/group-candidates`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -143,7 +144,7 @@ export default function Page(){
     
                 console.log('Enviando datos del candidato:', candidatePayload);
     
-                const responseCandidate = await fetch('http://localhost:3000/api/candidates', {
+                const responseCandidate = await fetch(`${config.apiBaseUrl}/api/candidates`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

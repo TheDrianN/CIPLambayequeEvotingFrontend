@@ -7,7 +7,7 @@ import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons'; // Import
 import SelectTypeCandidates from '../components/SelectTypeCandidate';
 import Select from '../components/Select';
 import Swal from 'sweetalert2';
-
+import config from '../config';
 
 const ModalAgregarMiembro = ({ isOpen, onClose, onAgregar,ariaHideApp = true }) => {
     const [miembro, setMiembro] = useState({
@@ -79,7 +79,7 @@ const ModalAgregarMiembro = ({ isOpen, onClose, onAgregar,ariaHideApp = true }) 
 
     const handleshearch = async () =>{
         try {
-            const response = await fetch(`http://localhost:3000/api/users/shearchDoc/${miembro.colegiatura}`);
+            const response = await fetch(`${config.apiBaseUrl}/api/users/shearchDoc/${miembro.colegiatura}`);
             const responseData = await response.json();
             console.log('Datos recibidos Nuevo:', responseData); // Imprime los datos en la consola
             if (response.ok) {

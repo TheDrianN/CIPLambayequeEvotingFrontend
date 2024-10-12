@@ -11,6 +11,7 @@ import CustomDataTable from "@/components/tabla";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import SelectSubElections from "@/components/SelectSubElection";
+import config from '../../../../../config';
 
 interface PageProps {
   params: {
@@ -52,7 +53,7 @@ const Page: React.FC<PageProps> = ({ params }) => {
   // Función para obtener los datos de la API y llenar el formulario
   const fetchData = async () => {
     try {
-      const response = await fetch('http://localhost:3000/api/group-candidates/' + params.id);
+      const response = await fetch(`${config.apiBaseUrl}/api/group-candidates/` + params.id);
       const responseData = await response.json();
       const data = responseData.data;
 
@@ -163,7 +164,7 @@ const Page: React.FC<PageProps> = ({ params }) => {
         img: ""
       };
 
-      const responseGroup = await fetch('http://localhost:3000/api/group-candidates/' + params.id, {
+      const responseGroup = await fetch(`${config.apiBaseUrl}/api/group-candidates/`+ params.id, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -188,7 +189,7 @@ const Page: React.FC<PageProps> = ({ params }) => {
 
       // Eliminar los candidatos eliminados usando `candidateId`
       const deleteCandidatesPromises = deletedCandidates.map(async (m) => {
-        const responseDelete = await fetch(`http://localhost:3000/api/candidates/${m.candidateId}`, {
+        const responseDelete = await fetch(`${config.apiBaseUrl}/api/candidates/${m.candidateId}`, {
           method: 'DELETE',
         });
 
@@ -205,7 +206,7 @@ const Page: React.FC<PageProps> = ({ params }) => {
           user_id: parseInt(miembro.id),
         };
 
-        const responseCandidate = await fetch('http://localhost:3000/api/candidates', {
+        const responseCandidate = await fetch(`${config.apiBaseUrl}/api/candidates`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

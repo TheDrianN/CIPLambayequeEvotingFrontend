@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Select, { SelectProps } from './Select';
+import config from '../config';
 
 
 interface Chapter {
@@ -16,7 +17,7 @@ const SelectChapters: React.FC<SelectChaptersProps> = (props) => {
   useEffect(() => {
     const fetchDataChapter = async () => {
       try {
-        const response = await fetch('http://localhost:3000/api/chapters?limit=10&page=1');
+        const response = await fetch(`${config.apiBaseUrl}/api/chapters?limit=10&page=1`);
         const responseData = await response.json();
         console.log('Datos recibidos:', responseData);
         setOptions(responseData.data); // Asumiendo que los capítulos están en responseData.data
