@@ -8,6 +8,7 @@ import config from '../../../../config';
 import Cookies from 'js-cookie';  // Importar js-cookie para manejar las cookies
 import jwt_decode from 'jsonwebtoken';  // Importar jsonwebtoken para decodificar el token JWT
 import { useRouter } from 'next/navigation';
+import { cookies } from 'next/headers';
 
 // Tipado para SubElection
 interface SubElection {
@@ -19,6 +20,7 @@ interface SubElection {
 interface Candidate {
   id: number;
   number_list: string;
+  img: string;
 }
 
 // Función para obtener subelecciones
@@ -106,35 +108,37 @@ const Page: React.FC<{ params: { id: string } }> = ({ params }) => {
     }
   }, [router]);  // Asegúrate de incluir router en las dependencias
 
-  if (!authorized) {
-    return <p>Acceso denegado. No tienes permiso para ver esta página.</p>;
-  }
+
 
 
   // Obtener las subelecciones
   useEffect(() => {
-    const fetchSubElections = async () => {
-      const result = await fetchDataSubElections(params.id,tokenAccess);
-      setSubElections(result);
-
-      result.forEach(async (subElection: SubElection) => {
-        const candidates = await fetchCandidatesForSubElection(subElection.id,tokenAccess);
-
-        // Agregar la opción de Voto en Blanco con id 0
-        candidates.push({
-          id: 0,
-          number_list: '0',
+    if (tokenAccess) {
+      const fetchSubElections = async () => {
+        const result = await fetchDataSubElections(params.id,tokenAccess);
+        setSubElections(result);
+  
+        result.forEach(async (subElection: SubElection) => {
+          const candidates = await fetchCandidatesForSubElection(subElection.id,tokenAccess);
+  
+          // Agregar la opción de Voto en Blanco con id 0
+          candidates.push({
+            id: 0,
+            number_list: '0',
+            img:'',
+          });
+  
+          setCandidatesBySubElection((prev) => ({
+            ...prev,
+            [subElection.id]: candidates,
+          }));
         });
-
-        setCandidatesBySubElection((prev) => ({
-          ...prev,
-          [subElection.id]: candidates,
-        }));
-      });
-    };
-
-    fetchSubElections();
-  }, [params.id]);
+      };
+  
+      fetchSubElections();
+    }
+   
+  }, [params.id,tokenAccess]);
 
   // Manejo de geolocalización
   useEffect(() => {
@@ -206,6 +210,80 @@ const Page: React.FC<{ params: { id: string } }> = ({ params }) => {
     }
   };
 
+  const generateVoteConfirmationMessage = async (): Promise<string> => {
+    let message = "Confirmación de su Voto:\n\n";
+  
+    // Iterar sobre las subelecciones para construir el mensaje
+    subElections.forEach((subElection) => {
+      const selectedOption = selectedOptions[subElection.id];
+      const candidate = candidatesBySubElection[subElection.id]?.find(
+        (candidate) => candidate.id === selectedOption
+      );
+  
+      message += `${subElection.title}: `;
+  
+      if (selectedOption === 0) {
+        message += "Voto en Blanco\n"; // Añadir que el voto es en blanco
+      } else if (candidate) {
+        message += `Lista número ${candidate.number_list}\n`; // Añadir el número de lista del candidato seleccionado
+      } else {
+        message += "No seleccionada\n"; // Si no hay selección, indicar que no fue seleccionada
+      }
+    });
+  
+    return message; // Devolver el mensaje completo
+  };
+  
+  // Función para enviar el mensaje a la API
+ // Función para enviar el mensaje a la API
+const sendVoteConfirmation = async (): Promise<boolean> => {
+  try {
+    // Generar el mensaje de confirmación
+    const confirmationMessage = await generateVoteConfirmationMessage();
+
+    // Obtener la cookie con js-cookie (por ejemplo, para 'access_token')
+    const data = Cookies.get('access_token'); // Asegúrate de que la cookie 'access_token' existe
+
+    // Verificar que la cookie 'access_token' esté disponible
+    if (!data) {
+      throw new Error('No se encontró la cookie access_token');
+    }
+
+    // Preparar los datos que se enviarán a la API
+    const payload = {
+      message: confirmationMessage,
+      sub: jwt_decode.decode(data)?.sub,  // Obtener 'sub' del token decodificado
+    };
+
+    // Enviar la solicitud POST a la API
+    const response = await fetch(`${config.apiBaseUrl}/api/auth/votingconfirmation`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${tokenAccess}`, // Enviar el token de autorización
+      },
+      body: JSON.stringify(payload), // Convertir los datos a JSON
+    });
+
+    // Verificar si la solicitud fue exitosa
+    if (!response.ok) {
+      throw new Error('Error al enviar la confirmación de voto');
+    }
+
+    const responseData = await response.json();
+    console.log('Respuesta de la API:', responseData);
+
+    // Si todo salió bien, retornar true
+    return true;
+
+  } catch (error) {
+    console.error('Error al enviar la confirmación de voto:', error);
+    return false; // En caso de error, retornar false
+  }
+};
+  
+  
+
   const handleConfirmVote = async () => {
     try {
       // Mostrar Swal de carga
@@ -217,84 +295,94 @@ const Page: React.FC<{ params: { id: string } }> = ({ params }) => {
           Swal.showLoading(); // Muestra el ícono de carga
         },
       });
+
+      const isVoteConfirmationSent = await sendVoteConfirmation();
+
+      if(isVoteConfirmationSent){
   
-      // Detectar el navegador usando Bowser
-      const browserInfo = Bowser.getParser(window.navigator.userAgent);
-      const browserName = browserInfo.getBrowserName(); // Obtener nombre del navegador
-  
-      const currentDate = new Date();
-      const isoDate = currentDate.toISOString();
-  
-      // Preparar los detalles de la elección
-      const electionDetails = {
-        elections_id: parseInt(params.id),
-        users_id: 1,
-        status: 'V',
-        browser: browserName, // Nombre del navegador
-        latitud: latitud || 'No disponible',
-        longitud: longitud || 'No disponible',
-        datevote: isoDate,
-      };
-  
-      console.log(electionDetails);
-  
-      // Enviar la primera solicitud POST a /api/vote-status
-      const responseStatus = await fetch(`${config.apiBaseUrl}/api/vote-status`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${tokenAccess}`,  // Enviar el token en la cabecera de autorización
-        },
-        body: JSON.stringify(electionDetails),
-      });
-  
-      // Comprobar si la solicitud fue exitosa
-      console.log(responseStatus.statusText);
-      if (!responseStatus.ok) {
-        throw new Error('Error al registrar el estado del voto');
+          // Detectar el navegador usando Bowser
+          const browserInfo = Bowser.getParser(window.navigator.userAgent);
+          const browserName = browserInfo.getBrowserName(); // Obtener nombre del navegador
+      
+          const currentDate = new Date();
+          const isoDate = currentDate.toISOString();
+      
+          // Preparar los detalles de la elección
+          const electionDetails = {
+            elections_id: parseInt(params.id),
+            users_id: 1,
+            status: 'V',
+            browser: browserName, // Nombre del navegador
+            latitud: latitud || 'No disponible',
+            longitud: longitud || 'No disponible',
+            datevote: isoDate,
+          };
+      
+          console.log(electionDetails);
+      
+          // Enviar la primera solicitud POST a /api/vote-status
+          const responseStatus = await fetch(`${config.apiBaseUrl}/api/vote-status`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${tokenAccess}`,  // Enviar el token en la cabecera de autorización
+            },
+            body: JSON.stringify(electionDetails),
+          });
+      
+          // Comprobar si la solicitud fue exitosa
+          console.log(responseStatus.statusText);
+          if (!responseStatus.ok) {
+            throw new Error('Error al registrar el estado del voto');
+          }
+      
+          const statusData = await responseStatus.json(); // Obtener los datos de la respuesta, incluyendo el `vote_status_id`
+          const vote_status_id = statusData.id; // Asumiendo que el ID del estado del voto es `id`
+          console.log(vote_status_id);
+      
+          // Preparar los votos
+          const votes = {
+            subelection: subElections.map(subElection => ({
+              sub_election_id: subElection.id,
+              group_candidates_id: selectedOptions[subElection.id],
+              vote_status_id: vote_status_id, // Incluir el vote_status_id obtenido de la primera API
+            })),
+          };
+      
+          console.log(votes);
+      
+          // Enviar los votos por cada subelección
+          const votePromises = votes.subelection.map(async (vote) => {
+            const responseVote = await fetch(`${config.apiBaseUrl}/api/voting`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${tokenAccess}`,  // Enviar el token en la cabecera de autorización
+              },
+              body: JSON.stringify(vote),
+            });
+      
+            if (!responseVote.ok) {
+              throw new Error(`Error al registrar el voto para la subelección ${vote.sub_election_id}`);
+            }
+      
+            return responseVote.json();
+          });
+      
+          // Esperar a que todas las promesas de votación se completen
+          await Promise.all(votePromises);
+      
+          // Cerrar el Swal de carga
+          Swal.close();
+      
+          // Mostrar mensaje de éxito si todo salió bien
+          Swal.fire('Confirmado', 'Tu voto ha sido registrado con éxito.', 'success').then(() => {
+            // Redirigir a otra ruta después de que el usuario haga clic en 'OK'
+            router.push('/voters/home');  // Cambia '/ruta-destino' por la ruta a la que quieres redirigir
+          });
+      }else{
+        Swal.fire('Error', 'No se pudo enviar la confirmación de voto.', 'error');
       }
-  
-      const statusData = await responseStatus.json(); // Obtener los datos de la respuesta, incluyendo el `vote_status_id`
-      const vote_status_id = statusData.id; // Asumiendo que el ID del estado del voto es `id`
-      console.log(vote_status_id);
-  
-      // Preparar los votos
-      const votes = {
-        subelection: subElections.map(subElection => ({
-          sub_election_id: subElection.id,
-          group_candidates_id: selectedOptions[subElection.id],
-          vote_status_id: vote_status_id, // Incluir el vote_status_id obtenido de la primera API
-        })),
-      };
-  
-      console.log(votes);
-  
-      // Enviar los votos por cada subelección
-      const votePromises = votes.subelection.map(async (vote) => {
-        const responseVote = await fetch(`${config.apiBaseUrl}/api/voting`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${tokenAccess}`,  // Enviar el token en la cabecera de autorización
-          },
-          body: JSON.stringify(vote),
-        });
-  
-        if (!responseVote.ok) {
-          throw new Error(`Error al registrar el voto para la subelección ${vote.sub_election_id}`);
-        }
-  
-        return responseVote.json();
-      });
-  
-      // Esperar a que todas las promesas de votación se completen
-      await Promise.all(votePromises);
-  
-      // Cerrar el Swal de carga
-      Swal.close();
-  
-      // Mostrar mensaje de éxito si todo salió bien
-      Swal.fire('Confirmado', 'Tu voto ha sido registrado con éxito.', 'success');
     } catch (error) {
       console.error('Error en el proceso de votación:', error);
   
@@ -332,12 +420,17 @@ const Page: React.FC<{ params: { id: string } }> = ({ params }) => {
           <button onClick={handleConfirmVote} className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 text-lg">
             Confirmar
           </button>
+          
         </div>
       </div>
     );
   }
 
   const currentSubElection = subElections[currentSubElectionIndex];
+
+  if (!authorized) {
+    return <p>Acceso denegado. No tienes permiso para ver esta página.</p>;
+  }
 
   return (
     <div className="max-w-4xl mx-auto p-4 bg-gray-100 min-h-screen">
@@ -364,8 +457,16 @@ const Page: React.FC<{ params: { id: string } }> = ({ params }) => {
                 >
                   <div className="flex items-center">
                     <div className="w-16 h-16 flex items-center justify-center rounded-lg mr-4 transition-all duration-300 bg-gray-300">
-                      <FontAwesomeIcon icon={faUser} className="text-2xl" />
-                    </div>
+                    {groupCandidate.img ? (
+                        <img 
+                          src={groupCandidate.img}  // La imagen se carga desde la URL
+                          alt={`Imagen del candidato ${groupCandidate.number_list}`} 
+                          className="w-full h-full object-cover rounded-lg" 
+                        />
+                      ) : (
+                        // Fallback: si no hay imagen, mostrar el ícono
+                        <FontAwesomeIcon icon={faUser} className="text-2xl" />
+                      )}                    </div>
                     <span className="font-medium">
                       {groupCandidate.number_list === '0' ? 'Voto en Blanco' : `Lista número ${groupCandidate.number_list}`}
                     </span>

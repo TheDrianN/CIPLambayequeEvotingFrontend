@@ -65,8 +65,9 @@ const SubElectionsDataTable = () => {
         setSelectedElection(election_Id);
         console.log('select', election_Id)
         setLoading(true); // Iniciar carga cuando se selecciona una nueva elección
+        const token = Cookies.get('access_token');  // Obtener el token de la cookie
         try {
-            const data = await fetchSubElections(election_Id,tokenAccess);
+            const data = await fetchSubElections(election_Id,token);
             setData(data);
         } catch (error) {
             setError(error);
@@ -77,9 +78,11 @@ const SubElectionsDataTable = () => {
 
     useEffect(() => {
         // Función para obtener datos y actualizar el estado
+        const token = Cookies.get('access_token');  // Obtener el token de la cookie
+
         const getInitialData = async () => {
             try {
-                const data = await fetchData(tokenAccess);
+                const data = await fetchData(token);
                 setData(data); // Asignar las elecciones a un estado para el select
             } catch (error) {
                 setError(error);

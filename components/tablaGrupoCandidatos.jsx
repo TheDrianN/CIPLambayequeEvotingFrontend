@@ -9,7 +9,6 @@ import Cookies from 'js-cookie';  // Importar js-cookie para manejar las cookies
 // Función para obtener datos de la API
 const fetchData = async (access_token) => {
     try {
-        console.log(access_token)
         const response = await fetch(`${config.apiBaseUrl}/api/group-candidates?limit=10&page=1`,{
             method: 'GET',  // Método GET para obtener datos
             headers: {

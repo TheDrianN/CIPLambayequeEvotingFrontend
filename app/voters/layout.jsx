@@ -7,6 +7,7 @@ import Button from '@/components/Button';
 import Cookies from 'js-cookie';  // Importar js-cookie para manejar las cookies
 import jwt_decode from 'jsonwebtoken';  // Importar jsonwebtoken para decodificar el token JWT
 import config from '../../config';
+import Link from 'next/link';
 
 const fetchUser = async (userid, access_token) => {
   try {
@@ -34,6 +35,11 @@ export default function VotersLayout({ children }) {
 
   const handleMenuToggle = () => {
     setIsMenuOpen(!isMenuOpen);
+  };
+
+  const handleLogut = () => {
+    Cookies.remove('access_token');  // Elimina la cookie llamada 'access_token'
+    window.location.reload(); 
   };
 
   useEffect(() => {
@@ -102,11 +108,13 @@ export default function VotersLayout({ children }) {
         } md:translate-x-0 w-full md:relative md:flex md:flex-col`}
       >
         <div className="h-14 text-center mb-4">
-          <img
-            src="https://www.cip.org.pe/images/LOGO_CIP.png"
-            alt="Logo"
-            className="mx-auto w-20 h-20"
-          />
+          <Link href="/voters/home"> {/* Cambia "/ruta-destino" por la ruta deseada */}
+            <img
+              src="https://www.cip.org.pe/images/LOGO_CIP.png"
+              alt="Logo"
+              className="mx-auto w-20 h-20 cursor-pointer"
+            />
+          </Link>
         </div>
 
         <div className="flex justify-end items-center gap-4 h-7 mt-auto">
@@ -121,6 +129,7 @@ export default function VotersLayout({ children }) {
             width="w-1/8"
             background="bg-transparent"
             hovercolor="hover:bg-black"
+            onClick={handleLogut}
           >
             <FontAwesomeIcon icon={faRightToBracket} />
           </Button>

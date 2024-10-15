@@ -90,8 +90,10 @@ const Page: React.FC<PageProps> = ({ params }) => {
   };
 
   useEffect(() => {
-    fetchData();
-  }, [params.id]);
+    if(tokenAccess  ){
+      fetchData();
+    }
+  }, [params.id,tokenAccess]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setFormValues({

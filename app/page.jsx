@@ -129,11 +129,12 @@ const Login = () => {
 
             Cookies.set('access_token', data.access_token, {
               expires: 1, // La cookie expirará en 1 día
-              secure: true, // La cookie solo se enviará a través de conexiones HTTPS
+              //secure: true, // La cookie solo se enviará a través de conexiones HTTPS
               sameSite: 'Strict',
             });
 
-             
+            console.log(data.access_token)
+
             const decodedToken = jwt_decode.decode(data.access_token);
 
             if(decodedToken.role =='V'){

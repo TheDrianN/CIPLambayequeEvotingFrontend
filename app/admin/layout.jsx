@@ -82,6 +82,11 @@ export default function AdminLayout({ children }) {
         setIsMenuOpen(!isMenuOpen);
     };
 
+    const handleLogut = () => {
+        Cookies.remove('access_token');  // Elimina la cookie llamada 'access_token'
+        window.location.reload(); 
+      };
+
     return (
         <div className="h-screen flex flex-col md:flex-row">
             <button
@@ -198,7 +203,7 @@ export default function AdminLayout({ children }) {
                             ) : (
                                 <p className="text-center mb-2">{name}</p>
                             )}
-                    <button className="block mx-auto p-2 rounded bg-red-700 hover:bg-red-800">
+                    <button onClick={handleLogut} className="block mx-auto p-2 rounded bg-red-700 hover:bg-red-800">
                         Cerrar Sesión
                     </button>
                 </div>

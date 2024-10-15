@@ -55,6 +55,7 @@ const Page: React.FC<PageProps> = ({ params }) => {
   const [selectedImage, setSelectedImage] = useState<File | null>(null); // Estado para la imagen seleccionada
   const [imagePreview, setImagePreview] = useState<string | null>(null); // Estado para la previsualización    
   const [uploadStatus, setUploadStatus] = useState<string | null>(null); // Estado para el estado del envío
+  const [originalImage, setOriginalImage] = useState<string | null>(null); // Estado para la imagen original
 
 
 
@@ -96,13 +97,12 @@ const Page: React.FC<PageProps> = ({ params }) => {
   // Función para obtener los datos de la API y llenar el formulario
   const fetchData = async () => {
     try {
-      const token = Cookies.get('access_token');  // Obtener el token de la cookie
 
       const response = await fetch(`${config.apiBaseUrl}/api/group-candidates/` + params.id,{
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,  // Enviar el token en la cabecera de autorización
+            'Authorization': `Bearer ${tokenAccess}`,  // Enviar el token en la cabecera de autorización
         },
       });
       const responseData = await response.json();
@@ -137,16 +137,19 @@ const Page: React.FC<PageProps> = ({ params }) => {
       });
 
       if (data.img) {
-        setImagePreview(data.img); // Asume que `data.img` contiene la URL de la imagen almacenada
+        setImagePreview(data.img);  // Para la previsualización
+        setOriginalImage(data.img); // Guardar la imagen original en el estado      }
       }
-    } catch (error) {
+   } catch (error) {
       console.error("Error fetching data:", error);
     }
   };
 
   useEffect(() => {
-    fetchData();
-  }, [params.id]);
+    if(tokenAccess){
+      fetchData();
+    }
+  }, [params.id,tokenAccess]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setFormValues({
@@ -218,13 +221,81 @@ const Page: React.FC<PageProps> = ({ params }) => {
     },
   ];
 
+  // Función para manejar la subida y eliminación de imágenes
+const handleImageUpload = async (): Promise<string> => {
+  try {
+    // Si no se ha seleccionado ninguna nueva imagen, retornar vacío
+    if (!selectedImage) {
+      return "";  // Retornar vacío si no se ha seleccionado una nueva imagen
+    }
+
+    // 1. Si hay una imagen antigua, eliminarla
+    if (originalImage && originalImage !== imagePreview) {
+      const deleteResponse = await fetch(`${config.apiBaseUrl}/api/firebase-service/deleteimg`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${tokenAccess}`,  // Enviar el token en la cabecera de autorización
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ url: originalImage }), // Pasar la URL de la imagen a eliminar
+      });
+
+      if (!deleteResponse.ok) {
+        throw new Error('Error al eliminar la imagen antigua');
+      }
+      console.log('Imagen antigua eliminada con éxito');
+    }
+
+    // 2. Subir la nueva imagen
+    const formData = new FormData();
+    formData.append('file', selectedImage); // Adjuntar la nueva imagen en el FormData
+
+    const uploadResponse = await fetch(`${config.apiBaseUrl}/api/firebase-service/sendimg`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${tokenAccess}`,  // Enviar el token en la cabecera de autorización
+      },
+      body: formData,
+    });
+
+    if (!uploadResponse.ok) {
+      throw new Error('Error al subir la nueva imagen');
+    }
+
+    const uploadData = await uploadResponse.json();
+    console.log('Nueva imagen subida:', uploadData.url);
+
+    // Retornar la nueva URL de la imagen subida
+    return uploadData.url;
+  } catch (error) {
+    console.error('Error en el manejo de la imagen:', error);
+    return "";  // En caso de error, retornar vacío
+  }
+};  
+
   const handleSubmit = async () => {
     try {
+      Swal.fire({
+        title: 'Procesando datos...',
+        text: 'Por favor, espere mientras actualizamos la información.',
+        allowOutsideClick: false,  // Evitar que se cierre al hacer clic fuera
+        didOpen: () => {
+          Swal.showLoading();  // Mostrar el spinner de carga
+        }
+      });
+  
+        // Llamar a la función de manejo de imágenes
+    const newImageUrl = await handleImageUpload();
+
+    // Si `newImageUrl` está vacío, mantén la URL original; de lo contrario, usa la nueva URL
+    const imageUrlToUse = newImageUrl || imagePreview;
+
+    // Preparar los datos del grupo usando la URL adecuada
       // Primero, actualiza el grupo de candidatos
       const groupPayload = {
         sub_election_id: parseInt(formValues.subelection),
         number_list: formValues.lista,
-        img: ""
+        img: imageUrlToUse, 
       };
 
       const responseGroup = await fetch(`${config.apiBaseUrl}/api/group-candidates/`+ params.id, {
@@ -291,6 +362,7 @@ const Page: React.FC<PageProps> = ({ params }) => {
       await Promise.all([...deleteCandidatesPromises, ...createCandidatesPromises]);
 
       // Muestra un mensaje de éxito
+      Swal.close();
       Swal.fire('Éxito', 'Grupo de candidatos y miembros actualizados correctamente.', 'success');
       router.push('/admin/candidatos');
     } catch (error) {

@@ -39,7 +39,7 @@ const ChaptersDataTable = () =>{
         // Función para obtener datos y actualizar el estado
         const getData = async () => {
             try {
-                const data = await fetchData(tokenAccess);
+                const data = await fetchData(token);
                 setData(data);
             } catch (error) {
                 setError(error);
@@ -73,11 +73,12 @@ const ChaptersDataTable = () =>{
     if (result.isConfirmed) {
         try {
             // Enviar solicitud a la API para eliminar
+            const token = Cookies.get('access_token');  // Obtener el token de la cookie
             const response = await fetch(`${config.apiBaseUrl}/api/chapters/${row.id}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${tokenAccess}`,  // Enviar el token en la cabecera de autorización
+                    'Authorization': `Bearer ${token}`,  // Enviar el token en la cabecera de autorización
                 },
             });
 
