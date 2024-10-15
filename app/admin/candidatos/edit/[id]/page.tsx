@@ -52,6 +52,11 @@ const Page: React.FC<PageProps> = ({ params }) => {
   const router = useRouter();
   const [ tokenAccess, setTokenAccess] = useState('');
   const [authorized, setAuthorized] = useState(false);  // Para controlar si el usuario está autorizado
+  const [selectedImage, setSelectedImage] = useState<File | null>(null); // Estado para la imagen seleccionada
+  const [imagePreview, setImagePreview] = useState<string | null>(null); // Estado para la previsualización    
+  const [uploadStatus, setUploadStatus] = useState<string | null>(null); // Estado para el estado del envío
+
+
 
   useEffect(() => {
     const token = Cookies.get('access_token');  // Obtener el token de la cookie
@@ -91,12 +96,13 @@ const Page: React.FC<PageProps> = ({ params }) => {
   // Función para obtener los datos de la API y llenar el formulario
   const fetchData = async () => {
     try {
+      const token = Cookies.get('access_token');  // Obtener el token de la cookie
+
       const response = await fetch(`${config.apiBaseUrl}/api/group-candidates/` + params.id,{
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${tokenAccess}`,  // Enviar el token en la cabecera de autorización
-
+            'Authorization': `Bearer ${token}`,  // Enviar el token en la cabecera de autorización
         },
       });
       const responseData = await response.json();
@@ -129,6 +135,10 @@ const Page: React.FC<PageProps> = ({ params }) => {
         subelection: data.sub_election_id.toString(),
         miembros: miembros,
       });
+
+      if (data.img) {
+        setImagePreview(data.img); // Asume que `data.img` contiene la URL de la imagen almacenada
+      }
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -144,6 +154,14 @@ const Page: React.FC<PageProps> = ({ params }) => {
       [e.target.id]: e.target.value,
     });
   };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+        setSelectedImage(file);
+        setImagePreview(URL.createObjectURL(file)); // Crear una URL temporal para previsualizar
+    }
+};
 
   const handleBackPage = () => {
     router.push('/admin/candidatos');
@@ -293,30 +311,54 @@ const Page: React.FC<PageProps> = ({ params }) => {
       <hr />
 
       <Card className="flex-1  mt-4 px-4">
-        <div className="w-full sm:w-1/3">
-          <label htmlFor='start_date'>Sub Elección</label>
-          <SelectSubElections
-            id='subelection'
-            name="subelection"
-            value={formValues.subelection}
-            onChange={handleChange}
-            error={errors.subelection}
-          />
-        </div>
-        <hr />
-        <div className="flex flex-wrap justify-between gap-4 mt-4 mb-4">
-          <div className='w-full sm:w-1/3'>
-            <label htmlFor='start_date'>N° de lista:</label>
-            <Select
-              id="lista"
-              name="lista"
-              value={formValues.lista}
-              onChange={handleChange}
-              options={optionsnumlist}
-              error={errors.lista}
-            />
-          </div>
-        </div>
+       
+      <div className="grid grid-cols-2 gap-4">
+              <div className="col-span-1">
+                <label htmlFor="subelection">Sub elección</label>
+                <SelectSubElections
+                  id="subelection"
+                  name="subelection"
+                  value={formValues.subelection}
+                  onChange={handleChange}
+                  error={errors.subelection}
+                />
+                <hr />
+                 <div className='mt-2 mb-2'>
+                    <label htmlFor="lista">N° de lista</label>
+                    <Select
+                      id="lista"
+                      name="lista"
+                      size='w-1/8'
+                      value={formValues.lista}
+                      onChange={handleChange}
+                      options={optionsnumlist}
+                      error={errors.lista}
+                    />
+                 </div>
+              </div>
+
+            
+
+              <div className="col-span-1 flex justify-end items-center">
+                <label
+                  htmlFor="imageInput"
+                  className="relative w-48 h-48 border-2 border-dashed border-gray-300 flex items-center justify-center cursor-pointer transition hover:border-gray-500"
+                >
+                  {imagePreview ? (
+                    <img src={imagePreview} alt="Previsualización" className="absolute w-full h-full object-cover" />
+                  ) : (
+                    <div className="text-gray-600 text-center">Cargar imagen</div>
+                  )}
+                  <input
+                    type="file"
+                    id="imageInput"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+            </div>
 
         <div className="flex flex-wrap items-center gap-4 mb-4">
           <label htmlFor="description">Miembros:</label>

@@ -37,6 +37,9 @@ export default function Page(){
         subelection: '',
         miembros: [],
     });
+    const [selectedImage, setSelectedImage] = useState<File | null>(null); // Estado para la imagen seleccionada
+    const [imagePreview, setImagePreview] = useState<string | null>(null); // Estado para la previsualización    
+    const [uploadStatus, setUploadStatus] = useState<string | null>(null); // Estado para el estado del envío
 
     const [modalOpen, setModalOpen] = useState(false); // Estado para controlar el modal
     const [ tokenAccess, setTokenAccess] = useState('');
@@ -101,6 +104,14 @@ export default function Page(){
         });
     };
 
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) {
+          setSelectedImage(file);
+          setImagePreview(URL.createObjectURL(file)); // Crear una URL temporal para previsualizar
+      }
+  };
+
     const handleBackPage = () => {
         router.push('/admin/candidatos');
     };
@@ -148,72 +159,137 @@ export default function Page(){
     ];
 
     const handleSubmit = async () => {
+      try {
+        if (!selectedImage) {
+          setUploadStatus('Por favor selecciona una imagen primero');
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Debes seleccionar una imagen antes de continuar.',
+          });
+          return;
+        }
+    
+        const formData = new FormData();
+        formData.append('file', selectedImage); // Aquí "file" es la clave para el backend
+    
+        // Mostrar mensaje de carga con SweetAlert
+        Swal.fire({
+          title: 'Espere por favor...',
+          text: 'Estamos procesando los datos',
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading(); // Mostrar el spinner de carga
+          }
+        });
+    
         try {
+          const response = await fetch(`${config.apiBaseUrl}/api/firebase-service/sendimg`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${tokenAccess}`,  // Enviar el token en la cabecera de autorización
+            },
+            body: formData, // El cuerpo de la solicitud es FormData
+          });
+    
+          if (!response.ok) {
+            throw new Error('Error al subir la imagen');
+          }
+    
+          const data = await response.json(); // Esperar la respuesta como JSON
+          console.log(data.url); // Imprime la URL de la imagen para verificar
+    
+          // Ahora 'data.url' debería contener la URL de la imagen subida
+          if (data.url) {
+            setUploadStatus(data.url);
+    
             // Primero, crea el grupo de candidatos
             const groupPayload = {
-                sub_election_id: parseInt(formValues.subelection),
-                number_list: formValues.lista,
-                img: ""
+              sub_election_id: parseInt(formValues.subelection),
+              number_list: formValues.lista,
+              img: data.url, // Usar data.url, que contiene la URL de la imagen subida
             };
     
             console.log('Enviando datos del grupo de candidatos:', groupPayload);
     
             const responseGroup = await fetch(`${config.apiBaseUrl}/api/group-candidates`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${tokenAccess}`,  // Enviar el token en la cabecera de autorización
-
-                },
-                body: JSON.stringify(groupPayload),
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${tokenAccess}`,  // Enviar el token en la cabecera de autorización
+              },
+              body: JSON.stringify(groupPayload),
             });
     
             if (!responseGroup.ok) {
-                throw new Error('Error al crear el grupo de candidatos');
+              throw new Error('Error al crear el grupo de candidatos');
             }
     
             const groupData = await responseGroup.json();
-    
             console.log('Respuesta del grupo de candidatos:', groupData.id);
     
             // Luego, crea los candidatos
             const candidatesPromises = formValues.miembros.map(async (miembro) => {
-                const candidatePayload = {
-                    type_candidate_id: parseInt(miembro.id_cargo), // Ajusta esto si es necesario
-                    group_candidate_id: groupData.id,
-                    user_id: parseInt(miembro.id), // Asegúrate de que `id` es el valor correcto para `user_id`
-                };
+              const candidatePayload = {
+                type_candidate_id: parseInt(miembro.id_cargo), // Ajusta esto si es necesario
+                group_candidate_id: groupData.id,
+                user_id: parseInt(miembro.id), // Asegúrate de que `id` es el valor correcto para `user_id`
+              };
     
-                console.log('Enviando datos del candidato:', candidatePayload);
+              console.log('Enviando datos del candidato:', candidatePayload);
     
-                const responseCandidate = await fetch(`${config.apiBaseUrl}/api/candidates`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${tokenAccess}`,  // Enviar el token en la cabecera de autorización
-
-                    },
-                    body: JSON.stringify(candidatePayload),
-                });
+              const responseCandidate = await fetch(`${config.apiBaseUrl}/api/candidates`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${tokenAccess}`,  // Enviar el token en la cabecera de autorización
+                },
+                body: JSON.stringify(candidatePayload),
+              });
     
-                if (!responseCandidate.ok) {
-                    throw new Error('Error al crear el candidato');
-                }
+              if (!responseCandidate.ok) {
+                throw new Error(`Error al crear el candidato con ID: ${miembro.id}`);
+              }
             });
     
             // Espera a que se creen todos los candidatos
             await Promise.all(candidatesPromises);
     
-            // Muestra un mensaje de éxito
-            Swal.fire('Éxito', 'Grupo de candidatos y miembros añadidos correctamente.', 'success');
-            // Opcional: Redirige a otra página
+            // Cerrar el mensaje de carga y mostrar éxito
+            Swal.close();
+            Swal.fire('Éxito', 'Grupo de candidatos, imagen y miembros añadidos correctamente.', 'success');
+            // Redirige a otra página
             router.push('/admin/candidatos');
-    
+          } else {
+            throw new Error('Error al obtener la URL de la imagen');
+          }
         } catch (error) {
-            console.error('Error:', error);
-            Swal.fire('Error', 'Ocurrió un error al agregar el grupo de candidatos o los miembros.', 'error');
+          // Cerrar el mensaje de carga y mostrar el error
+          Swal.close();
+          console.error('Error al subir la imagen:', error);
+          setUploadStatus('');
+          
+          // Mostrar mensaje de error con SweetAlert
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: error.message || 'Ocurrió un error al subir la imagen.',
+          });
         }
+      } catch (error) {
+        // Cerrar el mensaje de carga si se produce un error inesperado
+        Swal.close();
+        console.error('Error:', error);
+    
+        // Mostrar mensaje de error
+        Swal.fire({
+          icon: 'error',
+          title: 'Error inesperado',
+          text: 'Ocurrió un error inesperado. Por favor, intenta nuevamente.',
+        });
+      }
     };
+    
 
 
     if (!authorized) {
@@ -222,42 +298,63 @@ export default function Page(){
     
     return (
         <div className="m-5">
-      <div className="flex flex-wrap items-center justify-between">
-        <h1 className="text-lg font-medium sm:mb-0 sm:text-xl">Datos de los Candidatos</h1>
-      </div>
-      <hr />
-    
+            <div className="flex flex-wrap items-center justify-between">
+              <h1 className="text-lg font-medium sm:mb-0 sm:text-xl">Datos de los Candidatos</h1>
+            </div>
+            <hr />
+          
 
 
-      <Card className="flex-1  mt-4 px-4">
-        <div className="w-full sm:w-1/3">
-            <label htmlFor='start_date'>Sub elección</label>
-            <SelectSubElections
-            id='subelection'
-             name="subelection"
-            value={formValues.subelection}
-            onChange={handleChange}
-            error={errors.subelection}
-            />
-        </div>
-        <hr />
-        <div className="flex flex-wrap justify-between gap-4 mt-4 mb-4">
-            <div className='w-full sm:w-1/3'>
-                <label htmlFor='start_date'>N° de lista:</label>
-                <Select
-                    id="lista"
-                    name="lista"
-                    value={formValues.lista}
-                    onChange={handleChange}
-                    options={optionsnumlist}
-                    error={errors.lista}
+            <Card className="flex-1  mt-4 px-4">
+            
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="col-span-1">
+                <label htmlFor="subelection">Sub elección</label>
+                <SelectSubElections
+                  id="subelection"
+                  name="subelection"
+                  value={formValues.subelection}
+                  onChange={handleChange}
+                  error={errors.subelection}
                 />
-            </div>
+                <hr />
+                 <div className='mt-2 mb-2'>
+                    <label htmlFor="lista">N° de lista</label>
+                    <Select
+                      id="lista"
+                      name="lista"
+                      size='w-1/8'
+                      value={formValues.lista}
+                      onChange={handleChange}
+                      options={optionsnumlist}
+                      error={errors.lista}
+                    />
+                 </div>
+              </div>
 
-            <div className='w-full sm:w-1/3'>
-                
+            
+
+              <div className="col-span-1 flex justify-end items-center">
+                <label
+                  htmlFor="imageInput"
+                  className="relative w-48 h-48 border-2 border-dashed border-gray-300 flex items-center justify-center cursor-pointer transition hover:border-gray-500"
+                >
+                  {imagePreview ? (
+                    <img src={imagePreview} alt="Previsualización" className="absolute w-full h-full object-cover" />
+                  ) : (
+                    <div className="text-gray-600 text-center">Cargar imagen</div>
+                  )}
+                  <input
+                    type="file"
+                    id="imageInput"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="hidden"
+                  />
+                </label>
+              </div>
             </div>
-        </div>
 
         <div className="flex flex-wrap items-center gap-4 mb-4">
           <label htmlFor="description">Miembros:</label>

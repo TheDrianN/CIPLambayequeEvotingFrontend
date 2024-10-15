@@ -29,8 +29,15 @@ const SelectSubElections: React.FC<SelectSubElectionsProps> = (props) => {
           },
         });
         const responseData = await response.json();
-        console.log('Datos recibidos:', responseData);
-        setOptions(responseData.data); // Asumiendo que los capítulos están en responseData.data
+        if(responseData.data.length > 0){
+          console.log('Datos recibidos:', responseData);
+          setOptions(responseData.data); // Asumiendo que los capítulos están en responseData.data
+
+        }else{
+          setOptions([]);  // Asegurarse de que las opciones estén vacías
+
+        }
+       
         setLoading(false);
       } catch (error) {
         console.error('Error fetching data:', error);

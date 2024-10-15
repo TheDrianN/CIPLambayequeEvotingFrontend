@@ -9,6 +9,7 @@ import Cookies from 'js-cookie';  // Importar js-cookie para manejar las cookies
 // Función para obtener datos de la API
 const fetchData = async (access_token) => {
     try {
+        console.log(access_token)
         const response = await fetch(`${config.apiBaseUrl}/api/group-candidates?limit=10&page=1`,{
             method: 'GET',  // Método GET para obtener datos
             headers: {
@@ -30,15 +31,15 @@ const GrupoCandidatosDataTable = () => {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true); // Estado de carga
     const [error, setError] = useState(null); // Estado de error
-    const [ tokenAccess, setTokenAccess] = useState('');
 
     useEffect(() => {
         const token = Cookies.get('access_token');  // Obtener el token de la cookie
-        setTokenAccess(token)
+
+
         // Función para obtener datos y actualizar el estado
         const getData = async () => {
             try {
-                const data = await fetchData(tokenAccess);
+                const data = await fetchData(token);
                 setData(data);
             } catch (error) {
                 setError(error);
@@ -70,10 +71,14 @@ const GrupoCandidatosDataTable = () => {
         if (result.isConfirmed) {
             try {
                 // Enviar solicitud a la API para eliminar
+                const token = Cookies.get('access_token');  // Obtener el token de la cookie
+
                 const response = await fetch(`${config.apiBaseUrl}/api/group-candidates/${row.id}`, {
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,  // Enviar el token en la cabecera de autorización
+
                     },
                 });
 

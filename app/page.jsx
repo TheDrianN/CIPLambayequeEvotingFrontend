@@ -7,6 +7,7 @@ import Cookies from 'js-cookie'; // Librería para manejar cookies
 import config from '../config';
 import jwt_decode from 'jsonwebtoken';
 import { useRouter } from 'next/navigation';
+import Swal from 'sweetalert2';
 
 const Login = () => {
   const [step, setStep] = useState(1);
@@ -52,8 +53,18 @@ const Login = () => {
     setColegiaturaError('');
     setContraseñaError('');
     setError('');
-
+  
     try {
+      // Mostrar SweetAlert de carga
+      Swal.fire({
+        title: 'Espere por favor...',
+        text: 'Estamos verificando sus credenciales',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading(); // Mostrar el spinner de carga
+        }
+      });
+  
       // Solicitud a la API para autenticación
       const response = await fetch(`${config.apiBaseUrl}/api/auth/validation`, {
         method: 'POST',
@@ -61,24 +72,29 @@ const Login = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          document:colegiatura,
+          document: colegiatura,
           password: contraseña,
         }),
       });
-
+  
       const data = await response.json();
-
-      console.log(data)
-
+      console.log(data);
+  
+      // Cerrar el SweetAlert de carga
+      Swal.close();
+  
       if (response.ok) {
-        setCodigoVerificado(data.data)
-
+        setCodigoVerificado(data.data);
         setStep(2); // Cambiar al siguiente paso
       } else {
         setError(data.message || 'Error al iniciar sesión');
+        Swal.fire('Error', data.message || 'Error al iniciar sesión', 'error');
       }
     } catch (err) {
+      // Cerrar el SweetAlert de carga en caso de error
+      Swal.close();
       setError('Error de red o servidor');
+      Swal.fire('Error', 'Error de red o servidor', 'error');
     }
   };
 
