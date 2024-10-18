@@ -26,16 +26,22 @@ interface Candidate {
 // Función para obtener subelecciones
 const fetchDataSubElections = async (id: string, access_token:string): Promise<SubElection[]> => {
   try {
-    const response = await fetch(`${config.apiBaseUrl}/api/elections/findSubelectionChapter?election_id=${id}&chapter_id=1`,{
-      method: 'GET',  // Método GET para obtener datos
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${access_token}`,  // Enviar el token en la cabecera de autorización
-      },
-    });
-    const responseData = await response.json();
-    
-    return responseData.data && responseData.data.length > 0 ? responseData.data[0].subElections || [] : [];
+    const data = Cookies.get('access_token'); // Asegúrate de que la cookie 'access_token' existe
+    if(data){
+      const response = await fetch(`${config.apiBaseUrl}/api/elections/findSubelectionChapter?election_id=${id}&chapter_id=${jwt_decode.decode(data)?.chapter}`,{
+        method: 'GET',  // Método GET para obtener datos
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${access_token}`,  // Enviar el token en la cabecera de autorización
+        },
+      });
+      const responseData = await response.json();
+      
+      return responseData.data && responseData.data.length > 0 ? responseData.data[0].subElections || [] : [];
+    }else{
+      return  [];
+    }
+   
   } catch (error) {
     console.error('Error fetching subelections:', error);
     return [];
@@ -45,6 +51,7 @@ const fetchDataSubElections = async (id: string, access_token:string): Promise<S
 // Función para obtener candidatos por subelección
 const fetchCandidatesForSubElection = async (subElectionId: number, access_token:string): Promise<Candidate[]> => {
   try {
+
     const response = await fetch(`${config.apiBaseUrl}/api/group-candidates/findAllCandidatesSubElection/${subElectionId}`,{
       method: 'GET',  // Método GET para obtener datos
       headers: {
@@ -251,8 +258,8 @@ const sendVoteConfirmation = async (): Promise<boolean> => {
 
     // Preparar los datos que se enviarán a la API
     const payload = {
+      id: jwt_decode.decode(data)?.sub,  // Obtener 'sub' del token decodificado
       message: confirmationMessage,
-      sub: jwt_decode.decode(data)?.sub,  // Obtener 'sub' del token decodificado
     };
 
     // Enviar la solicitud POST a la API

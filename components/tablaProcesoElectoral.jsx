@@ -2,11 +2,10 @@
 import React, { useState, useEffect } from "react";
 import CustomDataTable from "./tabla"; // Asegúrate de que la ruta sea correcta
 import ActionButtons from "./ActionButtons"
-import { useRouter } from 'next/navigation';
 import Swal from 'sweetalert2';
-import { width } from "@fortawesome/free-solid-svg-icons/fa0";
 import config from '../config';
 import Cookies from 'js-cookie';  // Importar js-cookie para manejar las cookies
+import ModalEdit from './ModalEditProcesoE';  // Importa el componente del modal que creaste
 
 // Función para obtener datos de la API
 const fetchData = async (access_token) => {
@@ -30,11 +29,12 @@ const fetchData = async (access_token) => {
 
 
 const ProcesoElectoralDataTable = () => {
-    const router = useRouter();
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true); // Estado de carga
     const [error, setError] = useState(null); // Estado de error
     const [ tokenAccess, setTokenAccess] = useState('');
+    const [isModalOpen, setIsModalOpen] = useState(false);  // Estado para el modal
+    const [chapterToEdit, setChapterToEdit] = useState(null); // Estado para el capítulo que se va a editar
 
     useEffect(() => {
         // Función para obtener datos y actualizar el estado
@@ -54,9 +54,27 @@ const ProcesoElectoralDataTable = () => {
     }, []);
 
   
-    const handleEdit = (row) => {
-      router.push(`/admin/procesoelectoral/edit/${row.id}`);
+  const handleEdit = (row) => {
+      setChapterToEdit(row.id);  // Guardar el ID del capítulo que se va a editar
+      setIsModalOpen(true);  // Abrir el modal
   };
+
+  const handleCloseModal = () => {
+      setIsModalOpen(false);  // Cerrar el modal
+      setChapterToEdit(null); // Limpiar el capítulo seleccionado
+  };
+
+  const handleSuccessEdit = async () => {
+      setIsModalOpen(false);  // Cerrar el modal después de la edición
+      try {
+          // Volver a cargar los datos desde la API
+          const updatedData = await fetchData(tokenAccess);
+          setData(updatedData);  // Actualizar el estado de los datos
+      } catch (error) {
+          console.error('Error al recargar los datos:', error);
+      }
+  };
+
 
   const handleDelete = async (row) => {
     // Mostrar alerta de confirmación
@@ -188,8 +206,19 @@ const ProcesoElectoralDataTable = () => {
     }
 
     return (
+      <div className="h-full">
       <CustomDataTable columns={columns} data={data} />
-    );
+
+      {/* Modal para editar */}
+      {isModalOpen && (
+          <ModalEdit
+              isOpen={isModalOpen}
+              onClose={handleCloseModal}
+              onSuccess={handleSuccessEdit} // Llamar a handleSuccessEdit en lugar de setData([])
+              procesoId={chapterToEdit}  // Pasar el ID del capítulo a editar
+          />
+      )}
+  </div>    );
   };
   
   export default ProcesoElectoralDataTable;

@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import React, { useEffect, useState } from "react"
 import ProcesoElectoralDataTable from "../../../components/tablaProcesoElectoral";
@@ -8,12 +8,14 @@ import Button from "../../../components/Button"
 import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';  // Importar js-cookie para manejar las cookies
 import jwt_decode from 'jsonwebtoken';  // Importar jsonwebtoken para decodificar el token JWT
+import Modal from '../../../components/ModalAddProcesoE'; // Asegúrate de importar el modal
 
 
 export default function ProcesoElectoralPage(){
   const router = useRouter();
   const [authorized, setAuthorized] = useState(false);  // Para controlar si el usuario está autorizado
-
+  const [isModalOpen, setIsModalOpen] = useState(false);  // Estado para controlar el modal
+  const [reloadCounter, setReloadCounter] = useState(0);
 
 
   useEffect(() => {
@@ -48,10 +50,19 @@ export default function ProcesoElectoralPage(){
     }
   }, [router]);  // Asegúrate de incluir router en las dependencias
 
+
   const handleAddNewProceso = () => {
-    router.push('/admin/procesoelectoral/add');
+      setIsModalOpen(true);  // Abrir el modal al hacer clic en el botón
   };
-  
+
+  const handleCloseModal = () => {
+      setIsModalOpen(false);  // Función para cerrar el modal
+  };
+
+  const handleDataUpdate = () => {
+    // Cambiar el estado para forzar la recarga de la tabla
+    setReloadCounter(reloadCounter + 1);
+  };
   if (!authorized) {
     return <p>Acceso denegado. No tienes permiso para ver esta página.</p>;
   }
@@ -69,8 +80,14 @@ export default function ProcesoElectoralPage(){
           <FontAwesomeIcon icon={faPlus} /> Agregar nuevo proceso
         </Button>
       </div>
-      <hr />
-      <ProcesoElectoralDataTable />
+      <hr className="m-5 bg-black" />
+      <ProcesoElectoralDataTable key={reloadCounter}/>
+
+      <Modal
+                isOpen={isModalOpen}
+                onClose={handleCloseModal}
+                onSuccess={handleDataUpdate} // Pasar la función de recarga al modal
+            />
     </div>
   );
 }

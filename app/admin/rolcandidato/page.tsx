@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPlus } from '@fortawesome/free-solid-svg-icons'; // Importa el ícono
 import Button from "../../../components/Button"
 import { useRouter } from 'next/navigation';
+import Modal from '../../../components/ModalAddRolCandidato'; // Asegúrate de importar el modal
 import Cookies from 'js-cookie';  // Importar js-cookie para manejar las cookies
 import jwt_decode from 'jsonwebtoken';  // Importar jsonwebtoken para decodificar el token JWT
 
@@ -12,6 +13,8 @@ import jwt_decode from 'jsonwebtoken';  // Importar jsonwebtoken para decodifica
 export default function VotantesPage(){
     const router = useRouter();
     const [authorized, setAuthorized] = useState(false);  // Para controlar si el usuario está autorizado
+    const [isModalOpen, setIsModalOpen] = useState(false);  // Estado para controlar el modal
+    const [reloadCounter, setReloadCounter] = useState(0);
 
     useEffect(() => {
       const token = Cookies.get('access_token');  // Obtener el token de la cookie
@@ -47,8 +50,18 @@ export default function VotantesPage(){
     
 
     const handleAddNewProceso = () => {
-      router.push('/admin/rolcandidato/add');
+      setIsModalOpen(true);  // Abrir el modal al hacer clic en el botón
     };
+
+  const handleCloseModal = () => {
+      setIsModalOpen(false);  // Función para cerrar el modal
+  };
+
+  const handleDataUpdate = () => {
+    // Cambiar el estado para forzar la recarga de la tabla
+    setReloadCounter(reloadCounter + 1);
+  };
+
 
     if (!authorized) {
       return <p>Acceso denegado. No tienes permiso para ver esta página.</p>;
@@ -67,9 +80,14 @@ export default function VotantesPage(){
               <FontAwesomeIcon icon={faPlus} /> Agregar nuevo capitulo
             </Button>
           </div>
-          <hr />
+          <hr className="m-5 bg-black" />
           
-          <TypeCandidatesDataTable />
+          <TypeCandidatesDataTable key={reloadCounter} />
+          <Modal
+                isOpen={isModalOpen}
+                onClose={handleCloseModal}
+                onSuccess={handleDataUpdate} // Pasar la función de recarga al modal
+            />
         </div>
       );
 }

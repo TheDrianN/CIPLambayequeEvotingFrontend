@@ -6,6 +6,7 @@ import SelectElections from './SelectElections';
 import Swal from 'sweetalert2';
 import config from '../config';
 import Cookies from 'js-cookie';  // Importar js-cookie para manejar las cookies
+import ModalEdit from './ModalEditSubElection';  // Importa el componente del modal que creaste
 
 // Función para obtener subelecciones basadas en el ID de la elección
 const fetchSubElections = async (electionId,access_token) => {
@@ -52,6 +53,8 @@ const SubElectionsDataTable = () => {
     const [error, setError] = useState(null); // Estado de error
     const [selectedElection, setSelectedElection] = useState(''); // Estado para el ID de la elección seleccionada
     const [ tokenAccess, setTokenAccess] = useState('');
+    const [isModalOpen, setIsModalOpen] = useState(false);  // Estado para el modal
+    const [chapterToEdit, setChapterToEdit] = useState(null); // Estado para el capítulo que se va a editar
 
     useEffect(() => {
         const token = Cookies.get('access_token');  // Obtener el token de la cookie
@@ -95,7 +98,24 @@ const SubElectionsDataTable = () => {
     }, []);
 
     const handleEdit = (row) => {
-        router.push(`/admin/subelections/edit/${row.id}`);
+        setChapterToEdit(row.id);  // Guardar el ID del capítulo que se va a editar
+        setIsModalOpen(true);  // Abrir el modal
+    };
+  
+    const handleCloseModal = () => {
+        setIsModalOpen(false);  // Cerrar el modal
+        setChapterToEdit(null); // Limpiar el capítulo seleccionado
+    };
+  
+    const handleSuccessEdit = async () => {
+        setIsModalOpen(false);  // Cerrar el modal después de la edición
+        try {
+            // Volver a cargar los datos desde la API
+            const updatedData = await fetchData(tokenAccess);
+            setData(updatedData);  // Actualizar el estado de los datos
+        } catch (error) {
+            console.error('Error al recargar los datos:', error);
+        }
     };
 
     const handleDelete = async (row) => {
@@ -190,7 +210,7 @@ const SubElectionsDataTable = () => {
                     onView={() => handleView(row)} 
                     showEdit={true}
                     showDelete={true}
-                    showView={true}
+                    showView={false}
                 />
             ),
             ignoreRowClick: true,
@@ -219,6 +239,14 @@ const SubElectionsDataTable = () => {
                 />
            </div>
             <CustomDataTable columns={columns} data={data} />
+            {isModalOpen && (
+          <ModalEdit
+              isOpen={isModalOpen}
+              onClose={handleCloseModal}
+              onSuccess={handleSuccessEdit} // Llamar a handleSuccessEdit en lugar de setData([])
+              subElectionId={chapterToEdit}  // Pasar el ID del capítulo a editar
+          />
+      )}
         </div>
     );
 };

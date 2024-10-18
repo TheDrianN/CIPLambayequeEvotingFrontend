@@ -7,11 +7,14 @@ import SubElectionsDataTable from "../../../components/tablaSubElections"
 import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';  // Importar js-cookie para manejar las cookies
 import jwt_decode from 'jsonwebtoken';  // Importar jsonwebtoken para decodificar el token JWT
+import Modal from '../../../components/ModalAddSubElection'; // Asegúrate de importar el modal
 
 export default function VotantesPage(){
     const router = useRouter();
     const [authorized, setAuthorized] = useState(false);  // Para controlar si el usuario está autorizado
-
+    const [isModalOpen, setIsModalOpen] = useState(false);  // Estado para controlar el modal
+    const [reloadCounter, setReloadCounter] = useState(0);
+  
     useEffect(() => {
       const token = Cookies.get('access_token');  // Obtener el token de la cookie
     
@@ -44,9 +47,19 @@ export default function VotantesPage(){
       }
     }, [router]);  // Asegúrate de incluir router en las dependencias
 
+
     const handleAddNewProceso = () => {
-      router.push('/admin/subelections/add');
-    };
+      setIsModalOpen(true);  // Abrir el modal al hacer clic en el botón
+  };
+
+  const handleCloseModal = () => {
+      setIsModalOpen(false);  // Función para cerrar el modal
+  };
+
+  const handleDataUpdate = () => {
+    // Cambiar el estado para forzar la recarga de la tabla
+    setReloadCounter(reloadCounter + 1);
+  };
 
      
     if (!authorized) {
@@ -66,9 +79,13 @@ export default function VotantesPage(){
               <FontAwesomeIcon icon={faPlus} /> Agregar nueva sub elección
             </Button>
           </div>
-          <hr />
-          <SubElectionsDataTable/>
-          
+          <hr className="m-5 bg-black" />
+          <SubElectionsDataTable key={reloadCounter}/>
+          <Modal
+                isOpen={isModalOpen}
+                onClose={handleCloseModal}
+                onSuccess={handleDataUpdate} // Pasar la función de recarga al modal
+            />
         </div>
       );
 }
