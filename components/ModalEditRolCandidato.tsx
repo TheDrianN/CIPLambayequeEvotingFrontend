@@ -30,9 +30,9 @@ const ModalEditarRolCandidato: React.FC<ModalEditarRolCandidatoProps> = ({ isOpe
   const [tokenAccess, setTokenAccess] = useState('');
 
   const options = [
-    { value: 'CD', label: 'Cargo para el Consejo Departamental' },
-    { value: 'CA', label: 'Cargo para Asamblea Departamental' },
-    { value: 'CC', label: 'Cargo para Junta Directiva de los Capítulos' }
+    { value: "CD", label: "CARGO PARA EL CONSEJO DEPARTAMENTAL" },
+    { value: "CA", label: "CARGO PARA ASAMBLEA DEPARTAMENTAL" },
+    { value: "CC", label: "CARGO PARA JUNTA DIRECTIVA DE LOS CAPÍTULOS" },
   ];
 
   useEffect(() => {

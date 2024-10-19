@@ -23,6 +23,66 @@ interface Candidate {
   img: string;
 }
 
+const fetchValidationStatus = async (id_user: string, id_election: string, cookie: string) => {
+  try {
+    const datapayload = {
+      id_user: id_user,
+      id_election: id_election
+    };
+    console.log(datapayload)
+    if (cookie) {
+      const response = await fetch(`${config.apiBaseUrl}/api/vote-status/validationStatus`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${cookie}`,
+        },
+        body: JSON.stringify(datapayload),
+      });
+
+      if (response.ok) {
+        return {
+          success: true,
+          message: 'Validación exitosa, su voto ha sido confirmado.',
+        };
+      } else if (response.status === 404) {
+        return {
+          success: false,
+          message: 'No se encontró el estado de voto. Verifique su información.',
+        };
+      } else if (response.status === 401) {
+        return {
+          success: false,
+          message: 'Error de autenticación: No autorizado. Verifique su token.',
+        };
+      } else {
+        return {
+          success: false,
+          message: `Error inesperado: ${response.status}. Intente nuevamente más tarde.`,
+        };
+      }
+    } else {
+      return {
+        success: false,
+        message: 'No se proporcionó el token de autenticación. Inicie sesión de nuevo.',
+      };
+    }
+  } catch (error) {
+    if (error instanceof Error) {
+      return {
+        success: false,
+        message: `Error en la solicitud: ${error.message}. Verifique su conexión.`,
+      };
+    } else {
+      return {
+        success: false,
+        message: 'Error desconocido. Intente nuevamente.',
+      };
+    }
+  }
+};
+
+
 // Función para obtener subelecciones
 const fetchDataSubElections = async (id: string, access_token:string): Promise<SubElection[]> => {
   try {
@@ -84,35 +144,49 @@ const Page: React.FC<{ params: { id: string } }> = ({ params }) => {
   useEffect(() => {
     const token = Cookies.get('access_token');  // Obtener el token de la cookie
   
-    if (token) {
-      try {
-        // Decodificar el token directamente con jwt_decode
-        const decodedToken = jwt_decode.decode(token);
+    const validateToken = async () => {
+      if (token) {
+        try {
+          // Decodificar el token directamente con jwt_decode
+          const decodedToken = jwt_decode.decode(token);
   
-        // Verificar si `decodedToken` no es null
-        if (decodedToken && typeof decodedToken === 'object') {
-          setTokenAccess(token);
-          
-          // Verificar si el rol es "V"
-          if (decodedToken.role === 'V') {
-            setAuthorized(true);  // Usuario autorizado
-          } else if (decodedToken.role === 'A') {
-            router.push('/admin/procesoelectoral');
+          // Verificar si `decodedToken` no es null
+          if (decodedToken && typeof decodedToken === 'object') {
+            setTokenAccess(token);
+  
+            // Verificar si el rol es "V"
+            if (decodedToken.role === 'V') {
+              if (decodedToken.sub) {
+                // Aquí es donde usamos `await`
+                const validation = await fetchValidationStatus(decodedToken.sub, params.id, token);
+                console.log(validation.success);
+                if(validation.success === true){
+                  setAuthorized(false);  // Usuario autorizado
+                }else{
+                  setAuthorized(true);  // Usuario no autorizado
+                }
+              }
+            } else if (decodedToken.role === 'A') {
+              router.push('/admin/procesoelectoral');
+            } else {
+              setAuthorized(false);  // Si hay un error, no está autorizado
+              router.push('/404');  // Redirigir si no es autorizado
+            }
           } else {
-            setAuthorized(false);  // Si hay un error, no está autorizado
-            router.push('/404');  // Redirigir si no es autorizado
+            // Si `decodedToken` es null o no es un objeto válido
+            setAuthorized(false);
+            router.push('/404');  // Redirigir en caso de error
           }
-        } else {
-          // Si `decodedToken` es null o no es un objeto válido
-          setAuthorized(false);
+        } catch (error) {
           router.push('/404');  // Redirigir en caso de error
         }
-      } catch (error) {
-        router.push('/404');  // Redirigir en caso de error
+      } else {
+        router.push('/');  // Redirigir si no hay token
       }
-    } else {
-      router.push('/');  // Redirigir si no hay token
-    }
+    };
+  
+    // Llamar a la función `async`
+    validateToken();
   }, [router]);  // Asegúrate de incluir router en las dependencias
 
 
@@ -317,7 +391,7 @@ const sendVoteConfirmation = async (): Promise<boolean> => {
           // Preparar los detalles de la elección
           const electionDetails = {
             elections_id: parseInt(params.id),
-            users_id: 1,
+            users_id: jwt_decode.decode(tokenAccess)?.sub,
             status: 'V',
             browser: browserName, // Nombre del navegador
             latitud: latitud || 'No disponible',

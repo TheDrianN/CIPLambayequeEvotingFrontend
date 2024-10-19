@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import BarChart from './BarChart'; // El gráfico de barras
 import SelectElections from './SelectElections'; // Selección de elecciones
+import SelectChapter from './SelectChapter'; // Selección de elecciones
 import Select from './Select'; // Selección para subelecciones
 import Cookies from 'js-cookie';  // Importar js-cookie para manejar las cookies
 import Card from './Card';
@@ -48,6 +49,9 @@ const ResultadosElection = () => {
   const [selectedElection, setSelectedElection] = useState('');
   const [subElections, setSubElections] = useState([]);
   const [selectedSubElection, setSelectedSubElection] = useState('');
+  const [selectedChapter, setselectedChapter] = useState('');
+  const [selectedType, setselectedType] = useState('');
+
   const [ tokenAccess, setTokenAccess] = useState('');
   const [resultsData, setResultsData] = useState(null);
 
@@ -92,6 +96,11 @@ const ResultadosElection = () => {
     setResultsData(null);
   };
 
+  const options = [
+    { value: 'CD', label: 'Consejo Departamental' },
+    { value: 'CA', label: 'Asamblea Departamental' },
+    { value: 'CC', label: 'Junta Directiva de los Capítulos' }
+];
   const handleSubElectionChange = (e) => {
     setSelectedSubElection(e.target.value);
   };
@@ -117,6 +126,8 @@ const ResultadosElection = () => {
       {/* Selección de Elecciones y Subelecciones */}
       <div className="flex flex-col md:flex-row justify-center space-y-4 md:space-y-0 md:space-x-4 mb-4">
         <div className='w-full md:w-1/2'>
+        <label className="font-bold">Selecciona una Elección</label>
+
           <SelectElections
             id="election"
             name="election"
@@ -124,7 +135,10 @@ const ResultadosElection = () => {
             onChange={handleElectionChange}
           />
         </div>
+         
         <div className='w-full md:w-1/2'>
+        <label className="font-bold">Selecciona una Sub Elección</label>
+
           <Select
             id="lista"
             name="lista"
@@ -187,6 +201,8 @@ const ResultadosElection = () => {
                     <th className="px-4 py-2 border border-gray-300 text-center font-bold">N° Lista</th>
                     <th className="px-4 py-2 border border-gray-300 text-center font-bold">Nombre de Candidato</th>
                     <th className="px-4 py-2 border border-gray-300 text-center font-bold">Votos</th>
+                    <th className="px-4 py-2 border border-gray-300 text-center font-bold">% Votos</th>
+
                   </tr>
                 </thead>
                 <tbody>
@@ -195,14 +211,16 @@ const ResultadosElection = () => {
                       <td className="px-4 py-2 border border-gray-300 text-center">{candidato.numeroLista}</td>
                       <td className="px-4 py-2 border border-gray-300 text-center">{candidato.nombre}</td>
                       <td className="px-4 py-2 border border-gray-300 text-center">{candidato.votos}</td>
+                      <td className="px-4 py-2 border border-gray-300 text-center">{candidato.porcentaje}</td>
+
                     </tr>
                   ))}
                   <tr className="bg-gray-100">
-                    <td colSpan="2" className="px-4 py-2 border border-gray-300 text-center font-semibold">TOTAL DE VOTOS BLANCOS</td>
+                    <td colSpan="3" className="px-4 py-2 border border-gray-300 text-center font-semibold">TOTAL DE VOTOS BLANCOS</td>
                     <td className="px-4 py-2 border border-gray-300 text-center">{resultsData.votosBlancos}</td>
                   </tr>
                   <tr className="bg-gray-100">
-                    <td colSpan="2" className="px-4 py-2 border border-gray-300 text-center font-semibold">TOTAL DE VOTOS EMITIDOS</td>
+                    <td colSpan="3" className="px-4 py-2 border border-gray-300 text-center font-semibold">TOTAL DE VOTOS EMITIDOS</td>
                     <td className="px-4 py-2 border border-gray-300 text-center">{resultsData.votosEmitidos}</td>
                   </tr>
                 </tbody>

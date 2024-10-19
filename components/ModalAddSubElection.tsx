@@ -130,7 +130,7 @@ const ModalAgregarSubEleccion: React.FC<ModalAgregarSubEleccionProps> = ({ isOpe
       isOpen={isOpen}
       onRequestClose={onClose}
       ariaHideApp={false}
-      className="bg-white p-8 rounded-lg shadow-lg w-1/2 mt-24"
+      className="bg-white p-8 rounded-lg shadow-lg w-3/4 mt-24"
       overlayClassName="fixed z-10 inset-0 bg-black bg-opacity-50 flex justify-center items-center"
     >
       <div className="m-5">
@@ -138,7 +138,7 @@ const ModalAgregarSubEleccion: React.FC<ModalAgregarSubEleccionProps> = ({ isOpe
           <h1 className="text-lg font-medium sm:mb-0 sm:text-xl">Datos Generales</h1>
         </div>
         <hr />
-        <Card className="flex-1 max-w-6xl mt-4 px-4">
+        <Card className="flex-1 w-full mt-4 px-4">
           <form onSubmit={handleSubmit}>
             <div className="flex flex-wrap justify-between gap-4 mb-4">
               <div className='w-full sm:w-1/3'>

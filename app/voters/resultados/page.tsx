@@ -1,7 +1,5 @@
 'use client';
 import React, { useState, useEffect } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCheckToSlot, faLaptopMedical, faChartColumn, faClipboardQuestion } from "@fortawesome/free-solid-svg-icons";
 import { useRouter } from 'next/navigation';
 import ResultadosElection from "../../../components/Resultados";
 import Cookies from 'js-cookie';  // Importar js-cookie para manejar las cookies
@@ -44,7 +42,7 @@ export default function Page() {
 
   return (
     <div className="flex mt-10 justify-center  bg-gray-100">
-      <div className="text-center">
+      <div className="text-center w-3/4 ">
         <ResultadosElection/>
       </div>
     </div>

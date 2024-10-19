@@ -196,11 +196,7 @@ const SubElectionsDataTable = () => {
             selector: row => row.title, // Muestra el título del proceso
             sortable: true,
         },
-        {
-            name: 'Descripción',
-            selector: row => row.description, // Muestra el estado del proceso
-            sortable: true,
-        },
+        
         {
             name: 'Acciones',
             cell: (row) => (
