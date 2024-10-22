@@ -135,7 +135,26 @@ const SubElectionsDataTable = () => {
         if (result.isConfirmed) {
             try {
                 // Enviar solicitud a la API para eliminar
-                const response = await fetch(`${config.apiBaseUrl}/api/elections/${row.id}`, {
+
+                const subElectionvalidation = await fetch(`${config.apiBaseUrl}/api/group-candidates/validationSubElection/${row.id}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${tokenAccess}`,
+                    },
+                });
+                const subElectionvalidationBody = await subElectionvalidation.json();
+                
+                if (subElectionvalidation.status === 409) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Conflicto',
+                        text: subElectionvalidationBody.message || 'No se puede eliminar la sub eleccion debido a relaciones existentes.',
+                    });
+                    return; // Detener la ejecución si hay un conflicto
+                }
+
+                const response = await fetch(`${config.apiBaseUrl}/api/sub-elections/${row.id}`, {
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json',
@@ -150,9 +169,8 @@ const SubElectionsDataTable = () => {
                         icon: 'success',
                         title: 'Eliminado',
                         text: `El item con ID ${row.id} ha sido eliminado.`,
-                    });
-                    // Aquí puedes actualizar el estado o la UI para reflejar la eliminación
-                    window.location.reload();
+                    })
+                    setData(data.filter((item) => item.id !== row.id)); // Actualizar los datos localmente
                 } else {
                     Swal.fire({
                         icon: 'error',

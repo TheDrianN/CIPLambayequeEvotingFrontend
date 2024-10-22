@@ -104,8 +104,14 @@ const ProcesoElectoralDataTable = () => {
             });
 
             const responseBody = await response.json(); // Obtener el cuerpo de la respuesta
-
-            if (response.ok) {
+            if(response.Conflict){
+              Swal.fire({
+                icon: 'warning',
+                title: 'Conflicto',
+                text: responseBody.message || 'No se puede eliminar la Eleccion debido a relaciones existentes.',
+            });
+            }
+            else if (response.ok) {
                 Swal.fire({
                     icon: 'success',
                     title: 'Eliminado',

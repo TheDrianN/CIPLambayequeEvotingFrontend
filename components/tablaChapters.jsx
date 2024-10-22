@@ -84,7 +84,7 @@ const ChaptersDataTable = () => {
             confirmButtonText: 'Sí, eliminar',
             cancelButtonText: 'Cancelar',
         });
-
+    
         if (result.isConfirmed) {
             try {
                 const token = Cookies.get('access_token');  // Obtener el token de la cookie
@@ -95,32 +95,49 @@ const ChaptersDataTable = () => {
                         'Authorization': `Bearer ${token}`,
                     },
                 });
-
+    
                 const responseBody = await response.json(); // Obtener el cuerpo de la respuesta
-
+    
                 if (response.ok) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Eliminado',
-                        text: `El item con ID ${row.id} ha sido eliminado.`,
-                    });
-                    setData(data.filter((item) => item.id !== row.id)); // Actualizar los datos
+                    if (responseBody.status === 409) { // Si el status es CONFLICT (HttpStatus.CONFLICT)
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Conflicto',
+                            text: responseBody.message || 'No se puede eliminar el capítulo debido a relaciones existentes.',
+                        });
+                    } else if (responseBody.status === 200) { // Si el status es OK (HttpStatus.OK)
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Eliminado',
+                            text: `El item con ID ${row.id} ha sido eliminado correctamente.`,
+                        });
+                        setData(data.filter((item) => item.id !== row.id)); // Actualizar los datos localmente
+                    } else {
+                        // Manejar cualquier otro tipo de respuesta inesperada
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error inesperado',
+                            text: responseBody.message || 'Algo salió mal, por favor intente nuevamente.',
+                        });
+                    }
                 } else {
+                    // Si el servidor devuelve un error HTTP (como 4xx o 5xx)
                     Swal.fire({
                         icon: 'error',
                         title: 'Error al eliminar',
-                        text: JSON.stringify(responseBody.message),
+                        text: responseBody.message || 'No se pudo eliminar el capítulo.',
                     });
                 }
             } catch (error) {
                 Swal.fire({
                     icon: 'error',
                     title: 'Error de red',
-                    text: error.message,
+                    text: error.message || 'No se pudo conectar al servidor.',
                 });
             }
         }
     };
+    
 
     const columns = [
         {

@@ -69,34 +69,68 @@ const MiembrosVotantesDataTable = () =>{
         cancelButtonText: 'Cancelar'
     });
 
-    // Si el usuario confirma
     if (result.isConfirmed) {
         try {
-            // Enviar solicitud a la API para eliminar
-            const token = Cookies.get('access_token');  // Obtener el token de la cookie
+            const token = Cookies.get('access_token'); // Obtener el token de la cookie
+
+            // Realizar ambas solicitudes de validación
+            const candidateValidation = await fetch(`${config.apiBaseUrl}/api/candidates/validationUser/${row.id}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+            });
+
+            const voteStatusValidation = await fetch(`${config.apiBaseUrl}/api/vote-status/validationUser/${row.id}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+            });
+
+            // Procesar ambas respuestas
+            const candidateValidationBody = await candidateValidation.json();
+            const voteStatusValidationBody = await voteStatusValidation.json();
+
+            // Verificar si alguna de las validaciones devuelve un estado CONFLICT (409)
+            if (candidateValidationBody.status === 409 || voteStatusValidationBody.status === 409) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Conflicto',
+                    text: candidateValidationBody.message || voteStatusValidationBody.message || 'No se puede eliminar el capítulo debido a relaciones existentes.',
+                });
+                return; // Detener la ejecución si hay un conflicto
+            }
+
+            // Si ambas validaciones son exitosas, proceder a la eliminación
             const response = await fetch(`${config.apiBaseUrl}/api/users/${row.id}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,  // Enviar el token en la cabecera de autorización
+                    'Authorization': `Bearer ${token}`,
                 },
             });
 
-            const responseBody = await response.json(); // Obtener el cuerpo de la respuesta
+            const responseBody = await response.json(); // Obtener el cuerpo de la respuesta de eliminación
 
             if (response.ok) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Eliminado',
-                    text: `El item con ID ${row.id} ha sido eliminado.`,
-                });
-                // Aquí puedes actualizar el estado o la UI para reflejar la eliminación
-                window.location.reload()
+              Swal.fire({
+                  icon: 'success',
+                  title: 'Eliminado',
+                  text: `El item con ID ${row.id} ha sido eliminado.`,
+              }).then((result) => {
+                  if (result.isConfirmed) {
+                      // Solo se ejecuta si el usuario presiona "OK"
+                      window.location.reload();
+                  }
+              });
             } else {
                 Swal.fire({
                     icon: 'error',
                     title: 'Error al eliminar',
-                    text: JSON.stringify(responseBody.message),
+                    text: responseBody.message || 'No se pudo eliminar el item.',
                 });
             }
         } catch (error) {
@@ -107,7 +141,8 @@ const MiembrosVotantesDataTable = () =>{
             });
         }
     }
-  };
+};
+
 
 
   

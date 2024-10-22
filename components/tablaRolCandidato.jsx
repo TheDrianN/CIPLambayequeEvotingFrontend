@@ -101,14 +101,20 @@ const TypeCandidatesDataTable = () =>{
 
             const responseBody = await response.json(); // Obtener el cuerpo de la respuesta
 
-            if (response.ok) {
+            if (responseBody.status === 409) { // Si el status es CONFLICT (HttpStatus.CONFLICT)
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Conflicto',
+                    text: responseBody.message || 'No se puede eliminar el rol del candidato debido a relaciones existentes.',
+                });
+            } else if (response.ok) {
                 Swal.fire({
                     icon: 'success',
                     title: 'Eliminado',
                     text: `El item con ID ${row.id} ha sido eliminado.`,
                 });
                 // Aquí puedes actualizar el estado o la UI para reflejar la eliminación
-                window.location.reload()
+                setData(data.filter((item) => item.id !== row.id)); // Actualizar los datos localmente
             } else {
                 Swal.fire({
                     icon: 'error',
