@@ -145,7 +145,7 @@ const GrupoCandidatosDataTable = () => {
                     onEdit={() => handleEdit(row)} 
                     onDelete={() => handleDelete(row)} 
                     showEdit={true}
-                    showDelete={true}
+                    showDelete={false}
                     showView={false}
                 />
             ),
