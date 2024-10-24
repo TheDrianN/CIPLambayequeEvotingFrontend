@@ -19,7 +19,9 @@ const Login = () => {
   const [contraseñaError, setContraseñaError] = useState('');
   const [codigoError, setCodigoError] = useState(''); // Estado para el error del código
   const [error, setError] = useState('');
-
+  const [timeLeft, setTimeLeft] = useState(60); // Inicia en 60 segundos
+  const [isCounting, setIsCounting] = useState(false); // Estado para controlar cuándo iniciar el conteo
+  
   const router = useRouter();
 
   useEffect(() => {
@@ -47,6 +49,14 @@ const Login = () => {
       router.push('/');  // Redirigir si no hay token
     }
   }, [router]);  // Asegúrate de incluir router en las dependencias
+
+  useEffect(() => {
+    let timer;
+    if (isCounting && timeLeft > 0) {
+      timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
+    }
+    return () => clearTimeout(timer); // Limpiar el timer cuando el componente se desmonte
+  }, [timeLeft, isCounting]);
 
   const handleLogin = async () => {
     // Resetear errores
@@ -86,6 +96,8 @@ const Login = () => {
       if (response.ok) {
         setCodigoVerificado(data.data);
         setStep(2); // Cambiar al siguiente paso
+        setTimeLeft(60); // Reiniciar el tiempo a 60 segundos
+        setIsCounting(true); // Iniciar el contador
       } else {
         setError(data.message || 'Error al iniciar sesión');
         Swal.fire('Error', data.message || 'Error al iniciar sesión', 'error');
@@ -127,11 +139,10 @@ const Login = () => {
         if (response.ok) {
            
 
-            Cookies.set('access_token', data.access_token, {
-              expires: 1, // La cookie expirará en 1 día
-              //secure: true, // La cookie solo se enviará a través de conexiones HTTPS
-              sameSite: 'Strict',
-            });
+              Cookies.set('access_token', data.access_token, {
+                expires: 1 / 24, // 1 hora (1 día dividido entre 24)                //secure: true, // La cookie solo se enviará a través de conexiones HTTPS
+                sameSite: 'Strict',
+              });
 
             console.log(data.access_token)
 
@@ -228,9 +239,16 @@ const Login = () => {
             onChange={(e) => setCodigo(e.target.value)}
             error={codigoError}
           />
-          <p className="text-sm text-blue-500 cursor-pointer mb-5" onClick={handleLogin}>
+
+          {timeLeft > 0 ? (
+            <p className="text-sm text-neutral-950 p-2 text-center bg-amber-200 mb-4">El código expira en: {timeLeft} segundos</p>
+          ) : (
+            <p className="text-sm text-red-500 p-2 text-center bg-amber-200 mb-4">El código ha expirado.</p>
+          )}   
+
+                    <p className="text-sm text-blue-500 cursor-pointer mb-5" onClick={handleLogin}>
                 ¿No recibiste el código? <span className="underline">Reenviar código</span>
-              </p>
+              </p> 
 
           <Button onClick={handleCodigoValidacion}>Validar</Button>
         </Card>
