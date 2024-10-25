@@ -122,7 +122,7 @@ export default function AdminLayout({ children }) {
                         <Link href="/admin/capitulos" passHref>
                             <h4
                                 onClick={() => handleLinkClick('/admin/capitulos')}
-                                className={`block p-2 rounded hover:bg-red-700 font-medium text-lg ${activeLink === '/admin/capitulos' ? 'text-amber-400' : ''}`}
+                                className={`block p-2 rounded hover:bg-red-700 font-medium text-lg sm:text-sm md:text-lg ${activeLink === '/admin/capitulos' ? 'text-amber-400' : ''}`}
                             >
                                 Captitulos
                             </h4>
@@ -133,7 +133,7 @@ export default function AdminLayout({ children }) {
                         <Link href="/admin/votantes" passHref>
                             <h4
                                 onClick={() => handleLinkClick('/admin/votantes')}
-                                className={`block p-2 rounded hover:bg-red-700 font-medium text-lg ${activeLink === '/admin/votantes' ? 'text-amber-400' : ''}`}
+                                className={`block p-2 rounded hover:bg-red-700 font-medium text-lg sm:text-sm md:text-lg ${activeLink === '/admin/votantes' ? 'text-amber-400' : ''}`}
                             >
                                 Votantes
                             </h4>
@@ -144,7 +144,7 @@ export default function AdminLayout({ children }) {
                         <Link href="/admin/rolcandidato" passHref>
                             <h4
                                 onClick={() => handleLinkClick('/admin/rolcandidato')}
-                                className={`block p-2 rounded hover:bg-red-700 font-medium text-lg ${activeLink === '/admin/rolcandidato' ? 'text-amber-400' : ''}`}
+                                className={`block p-2 rounded hover:bg-red-700 font-medium text-lg sm:text-sm md:text-lg ${activeLink === '/admin/rolcandidato' ? 'text-amber-400' : ''}`}
                             >
                                 Rol de Candidato
                             </h4>
@@ -155,7 +155,7 @@ export default function AdminLayout({ children }) {
                         <Link href="/admin/procesoelectoral" passHref>
                             <h1
                                 onClick={() => handleLinkClick('/admin/procesoelectoral')}
-                                className={`block p-2 rounded hover:bg-red-700 font-medium text-lg ${activeLink === '/admin/procesoelectoral' ? 'text-amber-400' : ''}`}
+                                className={`block p-2 rounded hover:bg-red-700 font-medium text-lg sm:text-sm md:text-lg ${activeLink === '/admin/procesoelectoral' ? 'text-amber-400' : ''}`}
                             >
                                 Proceso Electoral
                             </h1>
@@ -165,7 +165,7 @@ export default function AdminLayout({ children }) {
                         <Link href="/admin/subelections" passHref>
                             <h1
                                 onClick={() => handleLinkClick('/admin/subelections')}
-                                className={`block p-2 rounded hover:bg-red-700 font-medium text-lg ${activeLink === '/admin/subelections' ? 'text-amber-400' : ''}`}
+                                className={`block p-2 rounded hover:bg-red-700 font-medium text-lg sm:text-sm md:text-lg ${activeLink === '/admin/subelections' ? 'text-amber-400' : ''}`}
                             >
                                 Sub Proceso
                             </h1>
@@ -176,7 +176,7 @@ export default function AdminLayout({ children }) {
                         <Link href="/admin/candidatos" passHref>
                             <h4
                                 onClick={() => handleLinkClick('/admin/candidatos')}
-                                className={`block p-2 rounded hover:bg-red-700 font-medium text-lg ${activeLink === '/admin/candidatos' ? 'text-amber-400' : ''}`}
+                                className={`block p-2 rounded hover:bg-red-700 font-medium text-lg sm:text-sm md:text-lg ${activeLink === '/admin/candidatos' ? 'text-amber-400' : ''}`}
                             >
                                 Candidatos
                             </h4>
@@ -184,16 +184,7 @@ export default function AdminLayout({ children }) {
                     </li>
                    
                    
-                    <li className="mb-2">
-                        <Link href="/admin/reportes" passHref>
-                            <h4
-                                onClick={() => handleLinkClick('/admin/reportes')}
-                                className={`block p-2 rounded hover:bg-red-700 font-medium text-lg ${activeLink === '/admin/reportes' ? 'text-amber-400' : ''}`}
-                            >
-                                Reportes
-                            </h4>
-                        </Link>
-                    </li>
+                   
                 </ul>
                 <div className="mt-auto">
                         {loading ? (

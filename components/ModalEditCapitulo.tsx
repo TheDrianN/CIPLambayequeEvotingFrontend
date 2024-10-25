@@ -150,7 +150,7 @@ const ModalEdit: React.FC<ModalEditProps> = ({ isOpen, onClose, onSuccess, chapt
       isOpen={isOpen}
       onRequestClose={onClose}
       ariaHideApp={false}
-      className="bg-white p-8 rounded-lg shadow-lg w-1/2 mt-24"
+      className="bg-white p-8 rounded-lg shadow-lg w-full sm:w-2/3 md:w-1/2 lg:w-1/3 mt-24"
       overlayClassName="fixed z-10 inset-0 bg-black bg-opacity-50 flex justify-center items-center"
     >
       <div className="m-5">
@@ -184,7 +184,7 @@ const ModalEdit: React.FC<ModalEditProps> = ({ isOpen, onClose, onSuccess, chapt
             <div className="flex justify-end gap-4 mt-4">
               <Button
                 onClick={onClose}
-                width="w-1/6 sm:w-1/6"
+                width="w-full sm:w-1/3 md:w-1/6"
                 background="bg-amber-500"
                 hovercolor="hover:bg-amber-600"
                 type="button"
@@ -195,7 +195,7 @@ const ModalEdit: React.FC<ModalEditProps> = ({ isOpen, onClose, onSuccess, chapt
                 type="submit"
                 background="bg-blue-500"
                 hovercolor="hover:bg-blue-700"
-                width="w-1/6 sm:w-1/6"
+                width="w-full sm:w-1/3 md:w-1/6"
               >
                 Guardar
               </Button>

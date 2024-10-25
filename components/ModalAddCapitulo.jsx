@@ -110,66 +110,67 @@ const ModalCapitulo = ({ isOpen, onClose,onSuccess, ariaHideApp = true }) => {
 
     return (
         <Modal
-            isOpen={isOpen}
-            onRequestClose={onClose}
-            ariaHideApp={ariaHideApp}
-            className="bg-white p-8 rounded-lg shadow-lg w-1/2 mt-24"  // Estilos del modal
-            overlayClassName="fixed z-10 inset-0 bg-black bg-opacity-50 flex justify-center items-center"  // Fondo oscurecido
-        >
-            <div className="m-5">
-                <div className="flex flex-wrap items-center justify-between">
-                    <h1 className="text-lg font-medium sm:mb-0 sm:text-xl">Datos del capitulo</h1>
-                </div>
-                <hr />
-                <Card className="flex-1 max-w-6xl mt-4 px-4">
-                    <form onSubmit={handleSubmit}>
-                        <div className="w-full ">
-                            <label htmlFor="names">Nombre del capitulo *</label>
-                            <InputField
-                                value={formValues.names}
-                                id="names"
-                                onChange={handleChange}
-                                type="text"
-                                error={errors.names}
-                            />
-                        </div>
-
-                        <div className="w-full sm:w-1/3">
-                            <label htmlFor="status">Estado *</label>
-                            <Select
-                                id="status"
-                                name="status"
-                                value={formValues.status}
-                                onChange={handleChange}
-                                options={options}
-                                error={errors.status}
-                            />
-                        </div>
-
-                        <p><b>(*) Son campos obligatorios</b></p>
-                        <div className="flex justify-end gap-4 mt-4">
-                            <Button
-                                onClick={onClose}
-                                width="w-1/6 sm:w-1/6"
-                                background="bg-amber-500"
-                                hovercolor="hover:bg-amber-600"
-                                type="button"
-                            >
-                                Cerrar
-                            </Button>
-                            <Button
-                                type="submit"
-                                background="bg-blue-500"
-                                hovercolor="hover:bg-blue-700"
-                                width="w-1/6 sm:w-1/6"
-                            >
-                                Guardar
-                            </Button>
-                        </div>
-                    </form>
-                </Card>
-            </div>
-        </Modal>
+        isOpen={isOpen}
+        onRequestClose={onClose}
+        ariaHideApp={ariaHideApp}
+        className="bg-white p-8 rounded-lg shadow-lg w-full sm:w-2/3 md:w-1/2 lg:w-1/3 mt-24" // Ajuste responsivo para el modal
+        overlayClassName="fixed z-10 inset-0 bg-black bg-opacity-50 flex justify-center items-center"
+      >
+        <div className="m-5 w-full">
+          <div className="flex flex-wrap items-center justify-between">
+            <h1 className="text-lg font-medium sm:mb-0 sm:text-xl">Datos del capitulo</h1>
+          </div>
+          <hr />
+          <Card className="flex-1 w-full max-w-full mt-4 px-4">
+            <form onSubmit={handleSubmit}>
+              <div className="w-full">
+                <label htmlFor="names">Nombre del capitulo *</label>
+                <InputField
+                  value={formValues.names}
+                  id="names"
+                  onChange={handleChange}
+                  type="text"
+                  error={errors.names}
+                />
+              </div>
+      
+              <div className="w-full sm:w-1/3">
+                <label htmlFor="status">Estado *</label>
+                <Select
+                  id="status"
+                  name="status"
+                  value={formValues.status}
+                  onChange={handleChange}
+                  options={options}
+                  error={errors.status}
+                />
+              </div>
+      
+              <p><b>(*) Son campos obligatorios</b></p>
+              <div className="flex flex-col sm:flex-row justify-end gap-4 mt-4">
+                <Button
+                  onClick={onClose}
+                  className="w-full sm:w-1/3 md:w-1/6"
+                  background="bg-amber-500"
+                  hovercolor="hover:bg-amber-600"
+                  type="button"
+                >
+                  Cerrar
+                </Button>
+                <Button
+                  type="submit"
+                  background="bg-blue-500"
+                  hovercolor="hover:bg-blue-700"
+                  className="w-full sm:w-1/3 md:w-1/6"
+                >
+                  Guardar
+                </Button>
+              </div>
+            </form>
+          </Card>
+        </div>
+      </Modal>
+      
     );
 };
 

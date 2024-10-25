@@ -292,7 +292,7 @@ const Page: React.FC<{ params: { id: string } }> = ({ params }) => {
   };
 
   const generateVoteConfirmationMessage = async (): Promise<string> => {
-    let message = "Confirmación de su Voto:\n\n";
+    let message = "";
   
     // Iterar sobre las subelecciones para construir el mensaje
     subElections.forEach((subElection) => {
@@ -301,6 +301,7 @@ const Page: React.FC<{ params: { id: string } }> = ({ params }) => {
         (candidate) => candidate.id === selectedOption
       );
   
+      // Asegúrate de que el formato del mensaje sea correcto con 'Elección: Voto'
       message += `${subElection.title}: `;
   
       if (selectedOption === 0) {
@@ -312,9 +313,8 @@ const Page: React.FC<{ params: { id: string } }> = ({ params }) => {
       }
     });
   
-    return message; // Devolver el mensaje completo
+    return message.trim(); // Eliminar posibles espacios o saltos de línea extra
   };
-  
   // Función para enviar el mensaje a la API
  // Función para enviar el mensaje a la API
 const sendVoteConfirmation = async (): Promise<boolean> => {
@@ -479,31 +479,50 @@ const sendVoteConfirmation = async (): Promise<boolean> => {
   if (isConfirmationVisible) {
     return (
       <div className="max-w-4xl mx-auto p-4 bg-gray-100 min-h-screen">
-        <h1 className="text-3xl font-bold text-center mb-6">Confirmación de Voto</h1>
-        <ul className="mb-6 text-lg">
-          {subElections.map((subElection) => (
-            <li key={subElection.id} className="mb-4">
-              <strong>{subElection.title}</strong>:{' '}
-              {selectedOptions[subElection.id] === 0
-                ? 'Voto en Blanco'
-                : `Lista número ${
-                    candidatesBySubElection[subElection.id]?.find(
-                      (candidate) => candidate.id === selectedOptions[subElection.id]
-                    )?.number_list || 'No seleccionada'
-                  }`}
-            </li>
-          ))}
-        </ul>
-        <div className="flex justify-between">
-          <button onClick={() => setIsConfirmationVisible(false)} className="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 text-lg">
-            Volver
-          </button>
-          <button onClick={handleConfirmVote} className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 text-lg">
-            Confirmar
-          </button>
-          
-        </div>
-      </div>
+  <h1 className="text-3xl font-bold text-center mb-6">Confirmación de Voto</h1>
+
+  {/* Tabla para confirmar el voto */}
+  <table className="table-auto w-full mb-6 text-lg bg-white shadow-md rounded-lg">
+    <thead>
+      <tr className="bg-gray-200 text-left">
+        <th className="px-4 py-2">Elección</th>
+        <th className="px-4 py-2">Voto</th>
+      </tr>
+    </thead>
+    <tbody>
+      {subElections.map((subElection) => (
+        <tr key={subElection.id} className="border-t">
+          <td className="px-4 py-2 font-semibold">{subElection.title}</td>
+          <td className="px-4 py-2">
+            {selectedOptions[subElection.id] === 0
+              ? 'Voto en Blanco'
+              : `Lista número ${
+                  candidatesBySubElection[subElection.id]?.find(
+                    (candidate) => candidate.id === selectedOptions[subElection.id]
+                  )?.number_list || 'No seleccionada'
+                }`}
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+
+  <div className="flex justify-between">
+    <button
+      onClick={() => setIsConfirmationVisible(false)}
+      className="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 text-lg"
+    >
+      Volver
+    </button>
+    <button
+      onClick={handleConfirmVote}
+      className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 text-lg"
+    >
+      Confirmar
+    </button>
+  </div>
+</div>
+
     );
   }
 

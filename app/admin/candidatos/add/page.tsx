@@ -308,7 +308,7 @@ export default function Page(){
             <Card className="flex-1  mt-4 px-4">
             
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="col-span-1">
                 <label htmlFor="subelection">Sub elección</label>
                 <SelectSubElections

@@ -241,9 +241,9 @@ const Login = () => {
           />
 
           {timeLeft > 0 ? (
-            <p className="text-sm text-neutral-950 p-2 text-center bg-amber-200 mb-4">El código expira en: {timeLeft} segundos</p>
+            <p className="text-sm text-neutral-950 p-2 text-center font-medium bg-yellow-400 mb-4">El código expira en: {timeLeft} segundos</p>
           ) : (
-            <p className="text-sm text-red-500 p-2 text-center bg-amber-200 mb-4">El código ha expirado.</p>
+            <p className="text-sm text-red-500 p-2 text-center font-medium bg-yellow-400 mb-4">El código ha expirado.</p>
           )}   
 
                     <p className="text-sm text-blue-500 cursor-pointer mb-5" onClick={handleLogin}>

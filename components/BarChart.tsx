@@ -17,73 +17,98 @@ const generateUniqueColors = (numColors: number) => {
 
 // Función para generar un color aleatorio con mayor variación
 const generateRandomColor = (): string => {
-  // Generar componentes de color con mayores diferencias
-  const getRandomChannel = () => Math.floor(Math.random() * 200 + 55); // Limitar para evitar colores muy oscuros o claros
+  const getRandomChannel = () => Math.floor(Math.random() * 200 + 55);
   const r = getRandomChannel();
   const g = getRandomChannel();
   const b = getRandomChannel();
-  return `rgb(${r},${g},${b})`; // Retorna el color en formato RGB
+  return `rgb(${r},${g},${b})`;
 };
 
 interface BarChartProps {
   labels: string[];
-  data: number[]; // Esta data es por cada candidato
-  className?: string;  // Nueva propiedad para aceptar clases de Tailwind
+  data: number[];
+  images: (string | undefined)[];
+  className?: string;
 }
 
-const BarChart: React.FC<BarChartProps> = ({ labels, data, className = 'w-full h-96' }) => {
-  // Si los labels o data están vacíos, evitar renderizar el gráfico
+const BarChart: React.FC<BarChartProps> = ({ labels, data, images, className = 'w-full h-96' }) => {
   if (!labels || labels.length === 0 || !data || data.length === 0) {
     return <div>No hay datos para mostrar.</div>;
   }
 
-  // Generar colores únicos para cada barra
   const colors = generateUniqueColors(labels.length);
 
-  // Crear datasets con los datos correspondientes para cada candidato
   const chartData = {
-    labels: labels, // Los nombres en la parte inferior del gráfico
+    labels: labels,
     datasets: [{
-      label: 'Votos en porcentaje', // Etiqueta para todas las barras
-      data: data, // Todos los valores para cada candidato
-      backgroundColor: colors, // Colores generados dinámicamente para cada barra
+      label: 'Votos en porcentaje',
+      data: data,
+      backgroundColor: colors,
       borderWidth: 1,
     }],
   };
 
+  // Plugin personalizado para agregar imágenes
+  const imagePlugin = {
+    id: 'imagePlugin',
+    afterDatasetsDraw(chart: any) {
+      const ctx = chart.ctx;
+      const meta = chart.getDatasetMeta(0);
+
+      meta.data.forEach((bar: any, index: number) => {
+        const imageSrc = images[index];
+        if (imageSrc) {
+          const image = new Image();
+          image.src = imageSrc;
+
+  
+          const imageSize = 50;
+
+          image.onload = () => {
+            const x = bar.x - imageSize / 2;  // Centrar la imagen horizontalmente
+            const y = bar.y - imageSize - 10;  // Colocar la imagen justo encima de la barra, ajustando con -10 píxeles
+            ctx.drawImage(image, x, y, imageSize, imageSize);
+          };
+
+          image.onerror = () => {
+            console.error(`Error al cargar la imagen en la barra ${index}: ${imageSrc}`);
+          };
+        } else {
+          console.warn(`Imagen no encontrada para la barra ${index}`);
+        }
+      });
+    }
+  };
+
   const options = {
     responsive: true,
-    maintainAspectRatio: false, // Permitir que el gráfico se ajuste según el tamaño del contenedor
+    maintainAspectRatio: false,
     plugins: {
       legend: {
-        display: false, // Mostrar leyenda para cada candidato
-        labels: {
-          usePointStyle: true, // Mostrar puntos en lugar de cuadros en la leyenda
-        },
+        display: false,
       },
       tooltip: {
-        enabled: true, // Habilitar tooltips
+        enabled: true,
       },
     },
     scales: {
       y: {
-        beginAtZero: true, // Empezar el eje Y desde 0
+        beginAtZero: true,
         ticks: {
-          callback: (value: any) => `${value}%`, // Mostrar % en el eje Y
+          callback: (value: any) => `${value}%`,
         },
       },
     },
     animation: {
-      duration: 1000, // Duración de la animación al hacer clic en la leyenda
+      duration: 1000,
     },
   };
 
   return (
-    <div className={className}> {/* Aplicar las clases de tamaño de Tailwind */}
-      <Bar data={chartData} options={options as any} />
+    <div className={className}>
+      <Bar data={chartData} options={options as any} plugins={[imagePlugin]} />
     </div>
   );
 };
-
 
 export default BarChart;

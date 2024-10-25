@@ -19,7 +19,6 @@ const fetchUser = async (userid, access_token) => {
       },
     });
     const responseData = await response.json();
-    console.log(responseData)
     return responseData.data;
   } catch (error) {
     console.error('Error fetching user data:', error);
@@ -100,30 +99,42 @@ export default function VotersLayout({ children }) {
           />
         </svg>
       </button>
-
+  
       {/* Menú de navegación */}
       <nav
-        className={`bg-red-600 w-full text-white flex flex-col md:p-6 transition-transform transform ${
-          isMenuOpen ? 'translate-x-0' : 'hidden'
-        } md:translate-x-0 w-full md:relative md:flex md:flex-col`}
+        className={`bg-red-600 w-full text-white flex flex-col md:flex-row items-center justify-between md:p-6 transition-transform transform ${
+          isMenuOpen ? 'block' : 'hidden'
+        } md:flex md:translate-x-0`}
       >
-        <div className="h-14 text-center mb-4">
-          <Link href="/voters/home"> {/* Cambia "/ruta-destino" por la ruta deseada */}
+        {/* Logo alineado a la izquierda */}
+        <div className="flex items-center mb-4 md:mb-0">
+          <Link href="/voters/home">
             <img
               src="https://www.cip.org.pe/images/LOGO_CIP.png"
               alt="Logo"
-              className="mx-auto w-20 h-20 cursor-pointer"
+              className="w-16 h-16 md:w-20 md:h-20 cursor-pointer"
             />
           </Link>
         </div>
-
-        <div className="flex justify-end items-center gap-4 h-7 mt-auto">
+  
+        {/* Opciones de navegación en columna en móviles y fila en pantallas grandes */}
+        <div className="flex flex-col md:flex-row justify-center items-center gap-4">
+          <Link href="/voters/home" className="hover:text-yellow-400 py-2 font-medium px-4 rounded-lg text-sm md:text-lg">
+            Inicio
+          </Link>
+          <Link href="/voters/mis-datos" className="hover:text-yellow-400 font-medium py-2 px-4 rounded-lg text-sm md:text-lg">
+            Mis Datos
+          </Link>
+        </div>
+  
+        {/* Información de usuario alineada a la derecha */}
+        <div className="flex items-center gap-4">
           {loading ? (
-            <p className="text-center mb-2">Cargando...</p>
+            <p className="text-center text-sm md:text-lg">Cargando...</p>
           ) : error ? (
-            <p className="text-center mb-2">{error}</p>
+            <p className="text-center text-sm md:text-lg">{error}</p>
           ) : (
-            <p className="text-center mb-2">{name}</p>
+            <p className="text-center text-sm md:text-lg">{name}</p>
           )}
           <Button
             width="w-1/8"
@@ -131,13 +142,14 @@ export default function VotersLayout({ children }) {
             hovercolor="hover:bg-black"
             onClick={handleLogut}
           >
-            <FontAwesomeIcon icon={faRightToBracket} />
+            <FontAwesomeIcon icon={faRightToBracket} size="lg" />
           </Button>
         </div>
       </nav>
-
+  
       {/* Área principal de contenido */}
       <main className="flex-1 p-4 bg-gray-100">{children}</main>
     </div>
   );
+  
 }

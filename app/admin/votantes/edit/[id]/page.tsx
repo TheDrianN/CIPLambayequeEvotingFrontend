@@ -440,7 +440,7 @@ const Page: React.FC<PageProps> = ({ params }) => {
                 <div className="flex justify-end gap-4 mt-4">
                     <Button
                         onClick={handleBackPage}
-                        width="w-1/6"
+                        width="w-full sm:w-1/6 md:w-1/6"
                         background="bg-amber-500"
                         hovercolor="hover:bg-amber-600"
                         type="button"
@@ -451,7 +451,7 @@ const Page: React.FC<PageProps> = ({ params }) => {
                         type="submit"
                         background="bg-blue-500"
                         hovercolor="hover:bg-blue-700"
-                        width="w-1/6"
+                        width="w-full sm:w-1/6 md:w-1/6"
                     >
                         Guardar
                     </Button>

@@ -6,6 +6,7 @@ import Select from './Select'; // Selección para subelecciones
 import Cookies from 'js-cookie';  // Importar js-cookie para manejar las cookies
 import Card from './Card';
 import config from '../config';
+import Swal from 'sweetalert2';
 
 // Función para obtener subelecciones basadas en el ID de la elección
 const fetchSubElections = async (electionId,access_token) => {
@@ -35,11 +36,25 @@ const fetchResultados = async (electionId,access_token) => {
         'Authorization': `Bearer ${access_token}`,  // Enviar el token en la cabecera de autorización
       },
     });
+    if (!response.ok) {
+      // Si la respuesta no es exitosa, lanzamos un error para capturarlo en el bloque 'catch'
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Error al obtener los resultados. Por favor, intenta nuevamente.',
+      });    
+    }
     const responseData = await response.json();
-   
+
     return responseData.data;
   } catch (error) {
     console.error('Error fetching subelections data:', error);
+    Swal.fire({
+      icon: 'error',
+      title: 'Oops...',
+      text: 'Error al obtener los resultados. Por favor, intenta mas tarde.',
+    });
+
     return [];
   }
 };
@@ -186,6 +201,7 @@ const ResultadosElection = () => {
             <BarChart
               labels={resultsData.candidatos.map(c => c.nombre)}
               data={resultsData.candidatos.map(c => c.porcentaje)}
+              images={resultsData.candidatos.map(c => c.img)}  // Pasamos las imágenes
               className="w-full h-96" // Ajuste de altura para hacer el gráfico más flexible
             />
           </div>

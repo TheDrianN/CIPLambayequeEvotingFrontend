@@ -135,7 +135,7 @@ const ModalAgregarMiembro = ({ isOpen, onClose, onAgregar,ariaHideApp = true }) 
             isOpen={isOpen}
             onRequestClose={onClose}
             ariaHideApp={ariaHideApp}
-            className="bg-white p-8 rounded-lg shadow-lg w-1/2 mt-24" // Estilos del modal
+            className="bg-white p-8 rounded-lg shadow-lg w-full sm:w-2/3 md:w-1/2 lg:w-1/3 mt-24" // Estilos del modal
             overlayClassName="fixed z-10 inset-0 bg-black bg-opacity-50 flex justify-center items-center" // Fondo oscurecido
         >
             <h2 className="text-xl font-semibold mb-4">Agregar Miembro</h2>
@@ -195,10 +195,10 @@ const ModalAgregarMiembro = ({ isOpen, onClose, onAgregar,ariaHideApp = true }) 
            
             
             <div className="flex gap-4 justify-end mt-4">
-                <Button onClick={onClose} background="bg-yellow-500" width='1/2'  type="button" hovercolor="hover:bg-yellow-600">
+                <Button onClick={onClose} background="bg-yellow-500" width='w-full sm:w-1/2 md:w-1/6'  type="button" hovercolor="hover:bg-yellow-600">
                     Cancelar
                 </Button>
-                <Button onClick={handleSubmit} width='1/2' background="bg-blue-500" hovercolor="hover:bg-blue-700" className="ml-4">
+                <Button onClick={handleSubmit} width='w-full sm:w-1/2 md:w-1/6' background="bg-blue-500" hovercolor="hover:bg-blue-700" className="ml-4">
                     Agregar
                 </Button>
             </div>
