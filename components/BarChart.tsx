@@ -94,6 +94,7 @@ const BarChart: React.FC<BarChartProps> = ({ labels, data, images, className = '
     scales: {
       y: {
         beginAtZero: true,
+        max: 100, // Asegurarse de que el eje Y termine en 100
         ticks: {
           callback: (value: any) => `${value}%`,
         },

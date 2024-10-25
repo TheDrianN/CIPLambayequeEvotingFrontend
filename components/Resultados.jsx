@@ -214,30 +214,30 @@ const ResultadosElection = () => {
               <table className="min-w-full bg-white border mt-2 border-gray-300 shadow-md rounded-lg overflow-hidden">
                 <thead>
                   <tr className="bg-gray-100">
-                    <th className="px-4 py-2 border border-gray-300 text-center font-bold">N° Lista</th>
-                    <th className="px-4 py-2 border border-gray-300 text-center font-bold">Nombre de Candidato</th>
-                    <th className="px-4 py-2 border border-gray-300 text-center font-bold">Votos</th>
-                    <th className="px-4 py-2 border border-gray-300 text-center font-bold">% Votos</th>
+                    <th className="px-4 py-2 border border-gray-300  font-bold">N° Lista</th>
+                    <th className="px-4 py-2 border border-gray-300  font-bold">Nombre de Candidato</th>
+                    <th className="px-4 py-2 border border-gray-300 font-bold">Votos</th>
+                    <th className="px-4 py-2 border border-gray-300  font-bold">% Votos</th>
 
                   </tr>
                 </thead>
                 <tbody>
                   {resultsData.candidatos.map((candidato, index) => (
                     <tr key={index}>
-                      <td className="px-4 py-2 border border-gray-300 text-center">{candidato.numeroLista}</td>
-                      <td className="px-4 py-2 border border-gray-300 text-center">{candidato.nombre}</td>
-                      <td className="px-4 py-2 border border-gray-300 text-center">{candidato.votos}</td>
-                      <td className="px-4 py-2 border border-gray-300 text-center">{candidato.porcentaje}</td>
+                      <td className="px-4 py-2 border border-gray-300 text-start ">{candidato.numeroLista}</td>
+                      <td className="px-4 py-2 border border-gray-300 text-start">{candidato.nombre}</td>
+                      <td className="px-4 py-2 border border-gray-300 ">{candidato.votos}</td>
+                      <td className="px-4 py-2 border border-gray-300 ">{candidato.porcentaje}</td>
 
                     </tr>
                   ))}
                   <tr className="bg-gray-100">
-                    <td colSpan="3" className="px-4 py-2 border border-gray-300 text-center font-semibold">TOTAL DE VOTOS BLANCOS</td>
-                    <td className="px-4 py-2 border border-gray-300 text-center">{resultsData.votosBlancos}</td>
+                    <td colSpan="3" className="px-4 py-2 border border-gray-300 text-start  font-semibold">TOTAL DE VOTOS BLANCOS</td>
+                    <td className="px-4 py-2 border border-gray-300  ">{resultsData.votosBlancos}</td>
                   </tr>
                   <tr className="bg-gray-100">
-                    <td colSpan="3" className="px-4 py-2 border border-gray-300 text-center font-semibold">TOTAL DE VOTOS EMITIDOS</td>
-                    <td className="px-4 py-2 border border-gray-300 text-center">{resultsData.votosEmitidos}</td>
+                    <td colSpan="3" className="px-4 py-2 border border-gray-300  text-start font-semibold">TOTAL DE VOTOS EMITIDOS</td>
+                    <td className="px-4 py-2 border border-gray-300  ">{resultsData.votosEmitidos}</td>
                   </tr>
                 </tbody>
               </table>
