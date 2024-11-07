@@ -273,7 +273,7 @@ export default function Page(){
           Swal.fire({
             icon: 'error',
             title: 'Error',
-            text: error.message || 'Ocurrió un error al subir la imagen.',
+            text: error instanceof Error ? error.message : 'Ocurrió un error al subir la imagen.',
           });
         }
       } catch (error) {
