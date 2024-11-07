@@ -88,7 +88,6 @@ const Login = () => {
       });
   
       const data = await response.json();
-      console.log(data);
   
       // Cerrar el SweetAlert de carga
       Swal.close();
@@ -101,6 +100,11 @@ const Login = () => {
       } else {
         setError(data.message || 'Error al iniciar sesión');
         Swal.fire('Error', data.message || 'Error al iniciar sesión', 'error');
+        if(data.message ==='Credenciales inválidas.'){
+          setColegiaturaError('Credenciales inválidas');
+          setContraseñaError('Credenciales inválidas');
+        }
+        
       }
     } catch (err) {
       // Cerrar el SweetAlert de carga en caso de error
@@ -120,6 +124,14 @@ const Login = () => {
       setError(''); // Resetea el error general
 
       try {
+        Swal.fire({
+          title: 'Espere por favor...',
+          text: 'Estamos verificando el codigo',
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading(); // Mostrar el spinner de carga
+          }
+        });
         // Solicitud a la API para autenticación
         const response = await fetch(`${config.apiBaseUrl}/api/auth/login`, {
           method: 'POST',
@@ -129,22 +141,22 @@ const Login = () => {
           body: JSON.stringify({
             document:colegiatura,
             password: contraseña,
+            code_access: codigo
           }),
         });
   
         const data = await response.json();
   
-        console.log(data)
   
         if (response.ok) {
-           
+          Swal.close();
+
 
               Cookies.set('access_token', data.access_token, {
                 expires: 1 / 24, // 1 hora (1 día dividido entre 24)                //secure: true, // La cookie solo se enviará a través de conexiones HTTPS
                 sameSite: 'Strict',
               });
 
-            console.log(data.access_token)
 
             const decodedToken = jwt_decode.decode(data.access_token);
 
@@ -161,7 +173,9 @@ const Login = () => {
 
 
         } else {
+          Swal.close();
           setError(data.message || 'Error al iniciar sesión');
+          Swal.fire('Error', data.message || 'Error al iniciar sesión', 'error');
         }
       } catch (err) {
         setError('Error de red o servidor');

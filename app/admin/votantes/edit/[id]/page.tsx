@@ -131,10 +131,10 @@ const Page: React.FC<PageProps> = ({ params }) => {
     });
   };
 
-    const options = [
-        { value: 'H', label: 'Habilitado' },
-        { value: 'I', label: 'Inhabilitado' }
-    ];
+  const options = [
+    { value: 'V', label: 'VIGENTE' },
+    { value: 'I', label: 'NO VIGENTE' }
+];
     const optionsRol = [
         { value: 'V', label: 'Votante' },
         { value: 'A', label: 'Administrador' }
