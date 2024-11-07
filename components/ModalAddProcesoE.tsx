@@ -64,7 +64,19 @@ const ModalAgregarProceso: React.FC<ModalAgregarProcesoProps> = ({ isOpen, onClo
     e.preventDefault();
 
     // Limpiar errores
-    const newErrors: Record<string, string> = {};
+    setErrors({
+      title: '',
+      start_date: '',
+      end_date: '',
+      status: ''
+    });
+
+    const newErrors: typeof errors = {
+      title: '',
+      start_date: '',
+      end_date: '',
+      status: ''
+    };
 
     // Validación
     if (!formValues.title) newErrors.title = 'El título es obligatorio';

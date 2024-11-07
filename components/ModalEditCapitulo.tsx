@@ -85,7 +85,10 @@ const ModalEdit: React.FC<ModalEditProps> = ({ isOpen, onClose, onSuccess, chapt
     });
 
     // Validación
-    const newErrors: typeof errors = {};
+    const newErrors: typeof errors = {
+      names: '',
+      status: '',
+    };
     if (!formValues.names) newErrors.names = 'Nombre del Capitulo es obligatorio';
     if (!formValues.status) newErrors.status = 'Estado es obligatorio';
 

@@ -94,7 +94,10 @@ const ModalEditarRolCandidato: React.FC<ModalEditarRolCandidatoProps> = ({ isOpe
     });
 
     // Validación
-    const newErrors: typeof errors = {};
+    const newErrors: typeof errors = {
+      name_type: '',
+      type: '',
+    };
 
     if (!formValues.name_type) newErrors.name_type = 'Nombre del Rol es obligatorio';
     if (!formValues.type) newErrors.type = 'El tipo de Rol es obligatorio';

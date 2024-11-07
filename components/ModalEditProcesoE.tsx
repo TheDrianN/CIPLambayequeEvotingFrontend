@@ -109,8 +109,21 @@ const ModalEditarProceso: React.FC<ModalEditarProcesoProps> = ({ isOpen, onClose
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    setErrors({
+      description: '',
+      title: '',
+      start_date: '',
+      end_date: '',
+      status: ''
+    });
     // Limpiar errores
-    const newErrors: Record<string, string> = {};
+    const newErrors: typeof errors = {
+      description: '',
+      title: '',
+      start_date: '',
+      end_date: '',
+      status: ''
+    };
 
     // Validación
     if (!formValues.title) newErrors.title = 'El título es obligatorio';

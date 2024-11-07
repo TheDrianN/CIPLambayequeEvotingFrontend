@@ -82,7 +82,15 @@ const ModalEditarSubEleccion: React.FC<ModalEditarSubEleccionProps> = ({ isOpen,
     e.preventDefault();
     
     // Limpiar errores
-    const newErrors: Record<string, string> = {};
+    setErrors({
+      election: '',
+      title: '',
+    });
+
+    const newErrors: typeof errors = {
+      election: '',
+      title: '',
+    };
 
     // Validación
     if (!formValues.title) newErrors.title = 'El título es obligatorio';
