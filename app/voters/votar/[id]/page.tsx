@@ -29,7 +29,6 @@ const fetchValidationStatus = async (id_user: string, id_election: string, cooki
       id_user: id_user,
       id_election: id_election
     };
-    console.log(datapayload)
     if (cookie) {
       const response = await fetch(`${config.apiBaseUrl}/api/vote-status/validationStatus`, {
         method: 'POST',
@@ -88,7 +87,16 @@ const fetchDataSubElections = async (id: string, access_token:string): Promise<S
   try {
     const data = Cookies.get('access_token'); // Asegúrate de que la cookie 'access_token' existe
     if(data){
-      const response = await fetch(`${config.apiBaseUrl}/api/elections/findSubelectionChapter?election_id=${id}&chapter_id=${jwt_decode.decode(data)?.chapter}`,{
+      const decodedToken = jwt_decode.decode(data);
+      const chapterId = (decodedToken && typeof decodedToken === 'object' && 'chapter' in decodedToken)
+      ? (decodedToken as any).chapter
+      : undefined;
+
+    if (!chapterId) {
+      throw new Error('El token no contiene la propiedad chapter');
+    }
+      
+      const response = await fetch(`${config.apiBaseUrl}/api/elections/findSubelectionChapter?election_id=${id}&chapter_id=${chapterId}`,{
         method: 'GET',  // Método GET para obtener datos
         headers: {
           'Content-Type': 'application/json',

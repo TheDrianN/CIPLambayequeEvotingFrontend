@@ -132,7 +132,14 @@ export default function Page() {
 
   
       // Validación
-      const newErrors: typeof errors = {};
+      const newErrors: typeof errors = {
+        document: '',
+          names: '',
+          surnames: '',
+          email: '',
+          phone:'',
+          date_of_birth:''
+      };
   
       if (!formValues.document) newErrors.document = 'Número de documento es obligatorio';
       if (!formValues.names) newErrors.names = 'Nombres completos son obligatorios';

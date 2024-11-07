@@ -158,7 +158,16 @@ const Page: React.FC<PageProps> = ({ params }) => {
   
     
         // Validación
-        const newErrors: typeof errors = {};
+        const newErrors: typeof errors = {
+          document: '',
+          names: '',
+          surnames: '',
+          status: '',
+          rol: '',
+          chapter: '',
+          email: '',
+          date_of_birth: ''
+        };
     
         if (!formValues.document) newErrors.document = 'Número de documento es obligatorio';
         if (!formValues.names) newErrors.names = 'Nombres completos son obligatorios';
