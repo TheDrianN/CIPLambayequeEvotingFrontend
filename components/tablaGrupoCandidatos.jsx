@@ -17,7 +17,6 @@ const fetchData = async (access_token) => {
             },
         });
         const responseData = await response.json();
-        console.log('Datos recibidos:', responseData); // Imprime los datos en la consola
         return responseData.data; // Devuelve solo la lista de datos
     } catch (error) {
       console.error('Error fetching data:', error);

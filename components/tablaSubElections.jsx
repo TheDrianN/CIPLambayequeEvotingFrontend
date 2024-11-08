@@ -19,7 +19,6 @@ const fetchSubElections = async (electionId,access_token) => {
             },
         });
         const responseData = await response.json();
-        console.log('Datos recibidos2:', responseData); // Imprime los datos en la consola
         return responseData.data; // Devuelve solo la lista de datos
     } catch (error) {
         console.error('Error fetching subelections data:', error);
@@ -38,7 +37,6 @@ const fetchData = async (access_token) => {
             },
         });
         const responseData = await response.json();
-        console.log('Datos recibidosA:', responseData.data); // Imprime los datos en la consola
         return responseData.data; // Devuelve solo la lista de datos
     } catch (error) {
         console.error('Error fetching data:', error);
@@ -66,7 +64,6 @@ const SubElectionsDataTable = () => {
     const handleElectionChange = async (electionId) => {
         const election_Id = event.target.value; // Extraer el valor del evento
         setSelectedElection(election_Id);
-        console.log('select', election_Id)
         setLoading(true); // Iniciar carga cuando se selecciona una nueva elección
         const token = Cookies.get('access_token');  // Obtener el token de la cookie
         try {

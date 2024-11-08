@@ -30,7 +30,6 @@ const SelectSubElections: React.FC<SelectSubElectionsProps> = (props) => {
         });
         const responseData = await response.json();
         if(responseData.data.length > 0){
-          console.log('Datos recibidos:', responseData);
           setOptions(responseData.data); // Asumiendo que los capítulos están en responseData.data
 
         }else{

@@ -186,7 +186,9 @@ export default function Page() {
                 icon: 'success',
                 title: 'Formulario enviado con éxito',
                 text: JSON.stringify(responseBody.message),
-            });
+            }).then(() => {
+              window.location.reload(); // Recarga la página después de que el usuario presiona "OK"
+          });
 
          
            

@@ -27,9 +27,7 @@ const SelectElections: React.FC<SelectElectionsProps> = (props) => {
           },
         });
         const responseData = await response.json();
-        console.log('Datos recibidos:', responseData);
         if(responseData.data.length > 0){
-          console.log('Datos recibidos:', responseData);
           setOptions(responseData.data); // Asumiendo que los capítulos están en responseData.data
 
         }else{
