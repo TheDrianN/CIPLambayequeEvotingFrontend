@@ -1,6 +1,6 @@
 // config.js
 const config = {
-    apiBaseUrl: 'http://192.168.100.24:3000', // URL base para tu API
+    apiBaseUrl: 'https://wpdkpmfbrf.us-east-2.awsapprunner.com', // URL base para tu API
   };
 
   export default config;
