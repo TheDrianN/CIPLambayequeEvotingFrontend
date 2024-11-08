@@ -162,14 +162,15 @@ export default function VotantesPage(){
       if (!formValues.password) newErrors.password = 'Contraseña es obligatoria';
       if (!formValues.date_of_birth) newErrors.date_of_birth = 'Fecha nacimiento es obligatoria';
 
-      console.log("emepzando");
+
 
       setErrors(newErrors);
-      console.log("yendo");
 
       // Si hay errores, no enviar el formulario
-      if (Object.keys(newErrors).length > 0) return;
-      console.log("fin");
+      if (Object.values(newErrors).some(error => error !== '')) {
+        console.log("Errores detectados", newErrors);
+        return;
+      }
 
       // Construir el objeto JSON
       const userData = {
