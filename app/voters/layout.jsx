@@ -123,7 +123,7 @@ export default function VotersLayout({ children }) {
             Inicio
           </Link>
           <Link href="/voters/mis-datos" className="hover:text-yellow-400 font-medium py-2 px-4 rounded-lg text-sm md:text-lg">
-            Mis Datos
+            Mis datos
           </Link>
         </div>
   

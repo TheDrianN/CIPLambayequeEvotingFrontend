@@ -150,7 +150,10 @@ export default function Page() {
       setErrors(newErrors);
   
       // Si hay errores, no enviar el formulario
-      if (Object.keys(newErrors).length > 0) return;
+      if (Object.values(newErrors).some(error => error !== '')) {
+        console.log("Errores detectados", newErrors);
+        return;
+      }
 
       let userData = {}; // Cambia `const` por `let`
 

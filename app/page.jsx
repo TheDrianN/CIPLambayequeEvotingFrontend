@@ -98,6 +98,7 @@ const Login = () => {
         setTimeLeft(60); // Reiniciar el tiempo a 60 segundos
         setIsCounting(true); // Iniciar el contador
       } else {
+        console.log(data.message)
         setError(data.message || 'Error al iniciar sesión');
         Swal.fire('Error', data.message || 'Error al iniciar sesión', 'error');
         if(data.message ==='Credenciales inválidas.'){
