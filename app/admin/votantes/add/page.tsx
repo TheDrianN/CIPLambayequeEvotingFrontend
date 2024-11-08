@@ -162,12 +162,15 @@ export default function VotantesPage(){
       if (!formValues.password) newErrors.password = 'Contraseña es obligatoria';
       if (!formValues.date_of_birth) newErrors.date_of_birth = 'Fecha nacimiento es obligatoria';
 
-      
+      console.log("emepzando");
+
       setErrors(newErrors);
-  
+      console.log("yendo");
+
       // Si hay errores, no enviar el formulario
       if (Object.keys(newErrors).length > 0) return;
-  
+      console.log("fin");
+
       // Construir el objeto JSON
       const userData = {
           chapter_id: Number(formValues.chapter),
@@ -180,7 +183,7 @@ export default function VotantesPage(){
           phone: formValues.phone,
           email: formValues.email,
           date_of_birth: new Date(formValues.date_of_birth).toISOString().split('T')[0],
-          code_access: '', // Si no hay `code_access`, se envía como cadena vacía
+          code_access: '0', // Si no hay `code_access`, se envía como cadena vacía
       };
       console.log(userData);
 
