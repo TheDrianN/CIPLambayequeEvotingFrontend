@@ -98,9 +98,10 @@ const Login = () => {
         setTimeLeft(60); // Reiniciar el tiempo a 60 segundos
         setIsCounting(true); // Iniciar el contador
       } else {
-        console.log(data.message)
-        setError(data.message || 'Error al iniciar sesión');
-        Swal.fire('Error', data.message || 'Error al iniciar sesión', 'error');
+        const errorMessage = typeof data.message === 'object' ? data.message?.message : data.message;
+        console.log(errorMessage); // Imprimirá el mensaje correcto en ambos casos
+        setError(errorMessage || 'Error al iniciar sesión');
+        Swal.fire('Error', errorMessage || 'Error al iniciar sesión', 'error');
         if(data.message ==='Credenciales inválidas.'){
           setColegiaturaError('Credenciales inválidas');
           setContraseñaError('Credenciales inválidas');
