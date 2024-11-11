@@ -109,8 +109,10 @@ const ModalEditarRolCandidato: React.FC<ModalEditarRolCandidatoProps> = ({ isOpe
     setErrors(newErrors);
 
     // Si hay errores, no enviar el formulario
-    if (Object.keys(newErrors).length > 0) return;
-
+    if (Object.values(newErrors).some(error => error !== '')) {
+      console.log("Errores detectados", newErrors);
+      return;
+    }
     // Construir el objeto JSON
     const userData = {
       type: formValues.type,

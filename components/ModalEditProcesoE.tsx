@@ -144,7 +144,10 @@ const ModalEditarProceso: React.FC<ModalEditarProcesoProps> = ({ isOpen, onClose
     setErrors(newErrors);
 
     // Si hay errores, no enviar el formulario
-    if (Object.keys(newErrors).length > 0) return;
+    if (Object.values(newErrors).some(error => error !== '')) {
+      console.log("Errores detectados", newErrors);
+      return;
+    }
 
     const isoStartDate = convertToISO(formValues.start_date);
     const isoEndDate = convertToISO(formValues.end_date);
