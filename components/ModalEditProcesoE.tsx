@@ -129,9 +129,16 @@ const ModalEditarProceso: React.FC<ModalEditarProcesoProps> = ({ isOpen, onClose
     if (!formValues.title) newErrors.title = 'El título es obligatorio';
     if (!formValues.start_date) newErrors.start_date = 'La fecha de inicio es obligatoria';
     if (!formValues.end_date) newErrors.end_date = 'La fecha de fin es obligatoria';
-    if (formValues.start_date && formValues.end_date && new Date(formValues.start_date) > new Date(formValues.end_date)) {
-      newErrors.end_date = 'La fecha de fin debe ser posterior a la fecha de inicio';
-    }
+    if (formValues.start_date && formValues.end_date) {
+      const startDate = new Date(formValues.start_date);
+      const endDate = new Date(formValues.end_date);
+  
+      if (endDate < startDate) {
+          newErrors.end_date = 'La fecha de fin no puede ser anterior a la fecha de inicio';
+      } else if (startDate.toDateString() === endDate.toDateString() && startDate > endDate) {
+          newErrors.end_date = 'La hora de fin debe ser posterior a la hora de inicio si es el mismo día';
+      }
+  }
     if (!formValues.status) newErrors.status = 'El estado es obligatorio';
 
     setErrors(newErrors);
@@ -203,7 +210,7 @@ const ModalEditarProceso: React.FC<ModalEditarProcesoProps> = ({ isOpen, onClose
       isOpen={isOpen}
       onRequestClose={onClose}
       ariaHideApp={false}
-      className="bg-white p-8 rounded-lg shadow-lg w-full sm:w-2/3 md:w-1/2 lg:w-1/3 mt-24"
+      className="bg-white p-8 rounded-lg shadow-lg w-full sm:w-2/3 md:w-1/2 lg:w-3/4 mt-24"
       overlayClassName="fixed z-10 inset-0 bg-black bg-opacity-50 flex justify-center items-center"
     >
       <div className="m-5">

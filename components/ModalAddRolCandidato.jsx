@@ -54,9 +54,11 @@ const ModalAgregarRolCandidato= ({ isOpen, onClose,onSuccess, ariaHideApp = true
 
     // Validación
     const newErrors = {};
-
-    if (!formValues.name_type)
-      newErrors.name_type = "Nombre del Rol es obligatorio";
+    if (!formValues.name_type) {
+      newErrors.name_type = 'Nombre del Rol es obligatorio';
+  } else if (!/^[a-zA-Z\s]+$/.test(formValues.name_type)) {
+      newErrors.name_type = 'Nombre del Rol solo pueden contener letras';
+  }
     if (!formValues.type) newErrors.type = "El tipo de Rol es obligatorio";
 
     setErrors(newErrors);
@@ -127,7 +129,7 @@ const ModalAgregarRolCandidato= ({ isOpen, onClose,onSuccess, ariaHideApp = true
       isOpen={isOpen}
       onRequestClose={onClose}
       ariaHideApp={ariaHideApp}
-      className="bg-white p-8 rounded-lg shadow-lg w-full sm:w-2/3 md:w-1/2 lg:w-1/3 mt-24"
+      className="bg-white p-8 rounded-lg shadow-lg w-full sm:w-2/3 md:w-1/2 lg:w-3/4 mt-24"
       overlayClassName="fixed z-10 inset-0 bg-black bg-opacity-50 flex justify-center items-center"
     >
       <div className="m-5">
@@ -135,7 +137,7 @@ const ModalAgregarRolCandidato= ({ isOpen, onClose,onSuccess, ariaHideApp = true
         <hr />
         <Card className="flex-1 max-w-6xl mt-4 px-4">
           <form onSubmit={handleSubmit}>
-            <div className="w-full sm:w-1/3">
+            <div className="w-full ">
               <label htmlFor="type">Tipo de rol *</label>
               <Select
                 id="type"

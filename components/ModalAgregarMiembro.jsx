@@ -135,7 +135,7 @@ const ModalAgregarMiembro = ({ isOpen, onClose, onAgregar,ariaHideApp = true }) 
             isOpen={isOpen}
             onRequestClose={onClose}
             ariaHideApp={ariaHideApp}
-            className="bg-white p-8 rounded-lg shadow-lg w-full sm:w-2/3 md:w-1/2 lg:w-1/3 mt-24" // Estilos del modal
+            className="bg-white p-8 rounded-lg shadow-lg w-full sm:w-2/3 md:w-1/2 lg:w-3/4 mt-24" // Estilos del modal
             overlayClassName="fixed z-10 inset-0 bg-black bg-opacity-50 flex justify-center items-center" // Fondo oscurecido
         >
             <h2 className="text-xl font-semibold mb-4">Agregar Miembro</h2>
