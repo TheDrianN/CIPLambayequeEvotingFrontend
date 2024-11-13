@@ -440,34 +440,27 @@ const sendVoteConfirmation = async (): Promise<boolean> => {
       
           console.log(votes);
       
-          // Enviar los votos por cada subelección
-          const votePromises = votes.subelection.map(async (vote) => {
+          for (const vote of votes.subelection) {
             const responseVote = await fetch(`${config.apiBaseUrl}/api/voting`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${tokenAccess}`,  // Enviar el token en la cabecera de autorización
+                Authorization: `Bearer ${tokenAccess}`,
               },
               body: JSON.stringify(vote),
             });
-      
+    
             if (!responseVote.ok) {
               throw new Error(`Error al registrar el voto para la subelección ${vote.sub_election_id}`);
             }
-      
-            return responseVote.json();
-          });
-      
-          // Esperar a que todas las promesas de votación se completen
-          await Promise.all(votePromises);
-      
-          // Cerrar el Swal de carga
+    
+            const responseData = await responseVote.json();
+            console.log(`Voto registrado para subelección ${vote.sub_election_id}:`, responseData);
+          }
+    
           Swal.close();
-      
-          // Mostrar mensaje de éxito si todo salió bien
           Swal.fire('Confirmado', 'Tu voto ha sido registrado con éxito.', 'success').then(() => {
-            // Redirigir a otra ruta después de que el usuario haga clic en 'OK'
-            router.push('/voters/home');  // Cambia '/ruta-destino' por la ruta a la que quieres redirigir
+            router.push('/voters/home');
           });
       }else{
         Swal.fire('Error', 'No se pudo enviar la confirmación de voto.', 'error');
