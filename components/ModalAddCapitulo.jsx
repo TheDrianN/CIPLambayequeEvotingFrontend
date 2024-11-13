@@ -50,7 +50,11 @@ const ModalCapitulo = ({ isOpen, onClose,onSuccess, ariaHideApp = true }) => {
 
         // Validación
         const newErrors = {};
-        if (!formValues.names) newErrors.names = 'Nombre del capitulo es obligatorio';
+        if (!formValues.names) {
+          newErrors.names = 'Nombre del capitulo es obligatorio';
+      } else if (!/^[a-zA-ZáéíóúñÁÉÍÓÚÑ\s]+$/.test(formValues.names)) {
+          newErrors.names = 'Nombre del capitulo solo pueden contener letras';
+      }
         if (!formValues.status) newErrors.status = 'Estado es obligatorio';
 
         setErrors(newErrors);

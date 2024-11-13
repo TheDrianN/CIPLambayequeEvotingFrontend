@@ -162,12 +162,13 @@ export default function VotantesPage(){
     }
     if (!formValues.names) {
         newErrors.names = 'Nombres completos son obligatorios';
-    } else if (!/^[a-zA-Z\s]+$/.test(formValues.names)) {
+    } else if (!/^[a-zA-ZáéíóúñÁÉÍÓÚÑ\s]+$/.test(formValues.names)) {
         newErrors.names = 'Nombres solo pueden contener letras';
     }
+    
     if (!formValues.surnames) {
         newErrors.surnames = 'Apellidos completos son obligatorios';
-    } else if (!/^[a-zA-Z\s]+$/.test(formValues.surnames)) {
+    } else if (!/^[a-zA-ZáéíóúñÁÉÍÓÚÑ\s]+$/.test(formValues.surnames)) {
         newErrors.surnames = 'Apellidos solo pueden contener letras';
     }
       if (!formValues.status) newErrors.status = 'Estado es obligatorio';

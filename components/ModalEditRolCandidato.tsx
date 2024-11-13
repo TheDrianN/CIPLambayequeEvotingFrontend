@@ -101,7 +101,7 @@ const ModalEditarRolCandidato: React.FC<ModalEditarRolCandidatoProps> = ({ isOpe
 
     if (!formValues.name_type) {
       newErrors.name_type = 'Nombre del Rol es obligatorio';
-  } else if (!/^[a-zA-Z\s]+$/.test(formValues.name_type)) {
+  } else if (!/^[a-zA-ZáéíóúñÁÉÍÓÚÑ\s]+$/.test(formValues.name_type)) {
       newErrors.name_type = 'Nombre del Rol solo pueden contener letras';
   }
     if (!formValues.type) newErrors.type = 'El tipo de Rol es obligatorio';

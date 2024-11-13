@@ -1,40 +1,37 @@
 'use client';
 import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCheckToSlot, faLaptopMedical, faChartColumn, faClipboardQuestion } from "@fortawesome/free-solid-svg-icons";
+import { faCheckToSlot, faChartColumn, faClipboardQuestion } from "@fortawesome/free-solid-svg-icons";
 import { useRouter } from 'next/navigation';
-import Cookies from 'js-cookie';  // Importar js-cookie para manejar las cookies
-import jwt_decode from 'jsonwebtoken';  // Importar jsonwebtoken para decodificar el token JWT
+import Cookies from 'js-cookie';
+import jwt_decode from 'jsonwebtoken';
 import config from '../../../config';
 
-// Función para obtener datos iniciales (e.g., todas las elecciones)
 const fetchData = async (access_token) => {
   try {
     const response = await fetch(`${config.apiBaseUrl}/api/elections/findElectionstatusP`, {
-      method: 'GET',  // Método GET para obtener datos
+      method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${access_token}`,  // Enviar el token en la cabecera de autorización
+        'Authorization': `Bearer ${access_token}`,
       },
     });
-    
+
     const responseData = await response.json();
-    
     console.log('Datos recibidos:', responseData);
-    return responseData.data.length > 0 ? responseData.data[0] : null; // Asegúrate de acceder al primer elemento en "data"
+    return responseData.data.length > 0 ? responseData.data[0] : null;
   } catch (error) {
     console.error('Error fetching data:', error);
-    return null; // Devuelve null en caso de error
+    return null;
   }
 };
 
-// Función para calcular el tiempo restante
-const calculateTimeRemaining = (endDate) => {
+const calculateTimeRemaining = (date) => {
   const now = new Date();
-  const electionEndDate = new Date(endDate);
-  const diff = electionEndDate - now;
+  const targetDate = new Date(date);
+  const diff = targetDate - now;
 
-  if (diff <= 0) return "La elección ha finalizado";
+  if (diff <= 0) return null;
 
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
   const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
@@ -45,78 +42,99 @@ const calculateTimeRemaining = (endDate) => {
 };
 
 export default function Page() {
-  const [election, setElection] = useState(null);  // Estado inicial como null
+  const [election, setElection] = useState(null);
   const [timeRemaining, setTimeRemaining] = useState('');
-  const [authorized, setAuthorized] = useState(false);  // Para controlar si el usuario está autorizado
-  const [ tokenAccess, setTokenAccess] = useState('');
+  const [timeUntilStart, setTimeUntilStart] = useState('');
+  const [authorized, setAuthorized] = useState(false);
+  const [tokenAccess, setTokenAccess] = useState('');
   const router = useRouter();
-  const [error, setError] = useState(false);  // Nuevo estado para manejar errores
+  const [error, setError] = useState(false);
+  const [votingEnabled, setVotingEnabled] = useState(false);
+  const [votingFinished, setVotingFinished] = useState(false);
 
-
-  // Verifica la cookie y decodifica el token para obtener el rol del usuario
   useEffect(() => {
-    const token = Cookies.get('access_token');  // Obtener el token de la cookie
-  
+    const token = Cookies.get('access_token');
+
     if (token) {
       try {
-        // Decodificar el token directamente con jwt_decode
         const decodedToken = jwt_decode.decode(token);
         setTokenAccess(token);
-        // Verificar si el rol es "V"
-        if (decodedToken.role === 'V') {
-          setAuthorized(true);  // Usuario autorizado
-        }else if(decodedToken.role =='A'){
 
+        if (decodedToken.role === 'V') {
+          setAuthorized(true);
+        } else if (decodedToken.role === 'A') {
           router.push('/admin/procesoelectoral');
         } else {
-          setAuthorized(false);  // Si hay un error, no está autorizado
-
-          router.push('/404');  // Redirigir si no es autorizado
+          router.push('/404');
         }
       } catch (error) {
-        router.push('/404');  // Redirigir en caso de error
+        router.push('/404');
       }
     } else {
-      router.push('/');  // Redirigir si no hay token
+      router.push('/');
     }
-  }, [router]);  // Asegúrate de incluir router en las dependencias
+  }, [router]);
 
-  
-  // Este useEffect solo hará la consulta a la API una vez cuando el componente se monte
   useEffect(() => {
     const getElectionData = async () => {
-      if (authorized && tokenAccess) {  // Verificamos que el usuario esté autorizado y que el token esté disponible
-        const data = await fetchData(tokenAccess);  // Enviamos el token en la solicitud
+      if (authorized && tokenAccess) {
+        const data = await fetchData(tokenAccess);
         if (data) {
-          console.log('Datos de elección:', data.title); // Verificar los datos recibidos
           setElection(data);
-          setTimeRemaining(calculateTimeRemaining(data.end_date)); // Calcula el tiempo restante inicialmente
+
+          const now = new Date();
+          const startDate = new Date(data.start_date);
+          const endDate = new Date(data.end_date);
+
+          if (now < startDate) {
+            setVotingEnabled(false);
+            setTimeUntilStart(calculateTimeRemaining(data.start_date));
+          } else if (now >= startDate && now < endDate) {
+            setVotingEnabled(true);
+            setTimeRemaining(calculateTimeRemaining(data.end_date));
+          } else {
+            setVotingEnabled(false);
+            setVotingFinished(true);
+          }
         } else {
-          setError(true); // Si no hay datos o falla la petición, marca error
+          setError(true);
         }
       }
     };
-  
-    getElectionData();  // Llamamos a la función para obtener los datos
-  }, [authorized, tokenAccess]);  // Aseguramos que se ejecute cuando authorized o tokenAccess cambien
 
-  // Este useEffect manejará el temporizador de actualización cada segundo
+    getElectionData();
+  }, [authorized, tokenAccess]);
+
   useEffect(() => {
     if (election) {
       const interval = setInterval(() => {
-        setTimeRemaining(calculateTimeRemaining(election.end_date));
-      }, 1000); // Actualiza el temporizador cada segundo
+        const now = new Date();
+        const startDate = new Date(election.start_date);
+        const endDate = new Date(election.end_date);
 
-      // Limpiar el intervalo cuando el componente se desmonta
+        if (now < startDate) {
+          setVotingEnabled(false);
+          setTimeUntilStart(calculateTimeRemaining(election.start_date));
+        } else if (now >= startDate && now < endDate) {
+          setVotingEnabled(true);
+          setTimeRemaining(calculateTimeRemaining(election.end_date));
+        } else {
+          setVotingEnabled(false);
+          setVotingFinished(true);
+          clearInterval(interval); // Dejar de actualizar cuando la votación finalice
+        }
+      }, 1000);
+
       return () => clearInterval(interval);
     }
-  }, [election]); // El intervalo solo se establece una vez cuando `election` está disponible
+  }, [election]);
 
   const handleClick = (path) => {
-    router.push(path); // Redirige a la ruta especificada
+    if (votingEnabled) {
+      router.push(path);
+    }
   };
 
- 
   if (!authorized) {
     return <p>Acceso denegado. No tienes permiso para ver esta página.</p>;
   }
@@ -124,29 +142,34 @@ export default function Page() {
   return (
     <div className="flex mt-10 justify-center h-screen bg-gray-100">
       <div className="text-center">
-      {error ? (  // Si hay un error
-          <p>No disponible en este momento</p> // Mensaje en caso de error
-        ) : election ? (  // Solo renderizar si `election` no es null
+        {error ? (
+          <p>No disponible en este momento</p>
+        ) : election ? (
           <>
-            <h1 className="text-2xl font-semibold text-center break-words whitespace-normal">{election.title}</h1> {/* Accediendo correctamente al título */}
-            <p className="mt-2 text-gray-600">Disponible en {timeRemaining}</p>
+            <h1 className="text-2xl font-semibold text-center break-words whitespace-normal">{election.title}</h1>
+            <p className="mt-2 text-gray-600">
+              {votingFinished
+                ? "La votación ha finalizado"
+                : votingEnabled
+                ? `Tiempo restante para votar: ${timeRemaining || 'Finalizado'}`
+                : `La votación comenzará en: ${timeUntilStart}`}
+            </p>
           </>
         ) : (
-          <p>Cargando datos de la elección...</p> // Mensaje temporal mientras se cargan los datos
+          <p>Cargando datos de la elección...</p>
         )}
 
-        <div className="mt-8 grid grid-cols-1   sm:grid-cols-3 gap-5">
-          {/* Votar */}
+        <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-5">
           <div
-            onClick={() => handleClick("votar/"+ election.id || '')}
-            className={`flex flex-col items-center p-6 bg-white shadow-md rounded-lg ${error ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:bg-gray-200'}`}
+            onClick={() => handleClick("votar/" + (election?.id || ''))}
+            className={`flex flex-col items-center p-6 bg-white shadow-md rounded-lg ${
+              votingEnabled ? 'cursor-pointer hover:bg-gray-200' : 'cursor-not-allowed opacity-50'
+            }`}
           >
             <FontAwesomeIcon icon={faCheckToSlot} className="text-yellow-600 text-4xl mb-4" />
             <h3 className="font-medium text-lg">Votar</h3>
           </div>
 
-
-          {/* Resultados */}
           <div
             onClick={() => handleClick("resultados")}
             className="flex flex-col items-center p-6 bg-white shadow-md rounded-lg cursor-pointer hover:bg-gray-200"
@@ -155,14 +178,13 @@ export default function Page() {
             <h3 className="font-medium text-lg">Resultados</h3>
           </div>
 
-          {/* Encuesta */}
           <div
-          onClick={() => window.open("https://forms.gle/p8VR14zF39ufXM4d9", "_blank")}
-          className="flex flex-col items-center p-6 bg-white shadow-md rounded-lg cursor-pointer hover:bg-gray-200"
-        >
-          <FontAwesomeIcon icon={faClipboardQuestion} className="text-blue-600 text-4xl mb-4" />
-          <h3 className="font-medium text-lg">Encuesta</h3>
-        </div>
+            onClick={() => window.open("https://forms.gle/p8VR14zF39ufXM4d9", "_blank")}
+            className="flex flex-col items-center p-6 bg-white shadow-md rounded-lg cursor-pointer hover:bg-gray-200"
+          >
+            <FontAwesomeIcon icon={faClipboardQuestion} className="text-blue-600 text-4xl mb-4" />
+            <h3 className="font-medium text-lg">Encuesta</h3>
+          </div>
         </div>
       </div>
     </div>

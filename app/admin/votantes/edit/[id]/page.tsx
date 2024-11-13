@@ -43,7 +43,8 @@ const Page: React.FC<PageProps> = ({ params }) => {
     chapter: '',
     rol: '',
     email: '',
-    date_of_birth:''
+    date_of_birth:'',
+    phone: ''
   });
 
   const router = useRouter();
@@ -152,7 +153,8 @@ const Page: React.FC<PageProps> = ({ params }) => {
             rol:'',
             chapter: '',
             email: '',
-            date_of_birth:''
+            date_of_birth:'',
+          phone: ''
         });
   
   
@@ -166,16 +168,49 @@ const Page: React.FC<PageProps> = ({ params }) => {
           rol: '',
           chapter: '',
           email: '',
-          date_of_birth: ''
+          date_of_birth: '',
+          phone: ''
         };
     
-        if (!formValues.document) newErrors.document = 'Número de documento es obligatorio';
-        if (!formValues.names) newErrors.names = 'Nombres completos son obligatorios';
-        if (!formValues.surnames) newErrors.surnames = 'Apellidos completos son obligatorios';
+        if (!formValues.document) {
+          newErrors.document = 'Número de documento es obligatorio';
+      } else if (formValues.document.length < 8) {
+          newErrors.document = 'Número de documento debe tener al menos 8 caracteres';
+      }
+      if (!formValues.names) {
+          newErrors.names = 'Nombres completos son obligatorios';
+      } else if (!/^[a-zA-ZáéíóúñÁÉÍÓÚÑ\s]+$/.test(formValues.names)) {
+          newErrors.names = 'Nombres solo pueden contener letras';
+      }
+      
+      if (!formValues.surnames) {
+          newErrors.surnames = 'Apellidos completos son obligatorios';
+      } else if (!/^[a-zA-ZáéíóúñÁÉÍÓÚÑ\s]+$/.test(formValues.surnames)) {
+          newErrors.surnames = 'Apellidos solo pueden contener letras';
+      }
         if (!formValues.status) newErrors.status = 'Estado es obligatorio';
+        if (!formValues.rol) newErrors.rol = 'Rol es obligatorio';
         if (!formValues.chapter) newErrors.chapter = 'Capítulo es obligatorio';
         if (!formValues.email) newErrors.email = 'Correo electrónico es obligatorio';
-        if (!formValues.date_of_birth) newErrors.date_of_birth = 'Fecha de cumpleaños es obligatoria';
+        if (!formValues.date_of_birth) {
+          newErrors.date_of_birth = 'Fecha de nacimiento es obligatoria';
+      } else {
+          const today = new Date();
+          const birthDate = new Date(formValues.date_of_birth);
+          const age = today.getFullYear() - birthDate.getFullYear();
+          const monthDiff = today.getMonth() - birthDate.getMonth();
+          const dayDiff = today.getDate() - birthDate.getDate();
+  
+          if (age < 20 || (age === 20 && (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)))) {
+              newErrors.date_of_birth = 'Debe ser mayor de 20 años';
+          }
+      }
+  
+      // Validación del número de celular (debe tener 9 dígitos si se ingresa)
+      if (formValues.phone && !/^\d{9}$/.test(formValues.phone)) {
+          newErrors.phone = 'Número de celular debe tener 9 dígitos';
+      }
+  
     
         setErrors(newErrors);
     
