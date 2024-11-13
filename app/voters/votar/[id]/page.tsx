@@ -440,31 +440,49 @@ const sendVoteConfirmation = async (): Promise<boolean> => {
       
           console.log(votes);
       
-          for (const vote of votes.subelection) {
+          // Enviar los votos por cada subelección
+          const votePromises = votes.subelection.map(async (vote) => {
             const responseVote = await fetch(`${config.apiBaseUrl}/api/voting`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${tokenAccess}`,
+                'Authorization': `Bearer ${tokenAccess}`,  // Enviar el token en la cabecera de autorización
               },
               body: JSON.stringify(vote),
             });
-    
+      
             if (!responseVote.ok) {
               throw new Error(`Error al registrar el voto para la subelección ${vote.sub_election_id}`);
             }
-    
-            const responseData = await responseVote.json();
-            console.log(`Voto registrado para subelección ${vote.sub_election_id}:`, responseData);
-          }
-    
+      
+            return responseVote.json();
+          });
+      
+      // Esperar a que todas las promesas de votación se completen
+      const results = await Promise.all(votePromises);
+      
+      // Cerrar el Swal de carga
+       // Extraer solo los IDs de los trabajos
+      const jobIds = results.map((result) => result.jobId);
+
+      // Formatear el mensaje con todos los IDs
+      const message = `
+      Tu voto ha sido añadido a la cola con los siguientes identificadores de trabajo: ${jobIds.join(', ')}.
+      Podrás verificar su estado utilizando estos IDs.
+      Recibirás un correo electrónico de confirmación cuando el proceso haya finalizado.
+          `;
+
+          // Cerrar el Swal de carga
           Swal.close();
-          Swal.fire('Confirmado', 'Tu voto ha sido registrado con éxito.', 'success').then(() => {
+
+          // Mostrar un único mensaje con todos los IDs concatenados
+          Swal.fire('Confirmado', message.trim(), 'success').then(() => {
+            // Redirigir al usuario después de confirmar
             router.push('/voters/home');
           });
-      }else{
-        Swal.fire('Error', 'No se pudo enviar la confirmación de voto.', 'error');
-      }
+        }else{
+          Swal.fire('Error', 'No se pudo enviar la confirmación de voto.', 'error');
+        }
     } catch (error) {
       console.error('Error en el proceso de votación:', error);
   
