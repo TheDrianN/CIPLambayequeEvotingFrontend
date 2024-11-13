@@ -402,8 +402,8 @@ const sendVoteConfirmation = async (): Promise<boolean> => {
             users_id: jwt_decode.decode(tokenAccess)?.sub,
             status: 'V',
             browser: browserName, // Nombre del navegador
-            latitud: latitud || 'No disponible',
-            longitud: longitud || 'No disponible',
+            latitud: latitud != null ? String(latitud) : 'No disponible',
+            longitud: longitud != null ? String(longitud) : 'No disponible',
             datevote: isoDate,
           };
       
