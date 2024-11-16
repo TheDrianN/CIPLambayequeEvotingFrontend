@@ -91,7 +91,7 @@ const ModalEdit: React.FC<ModalEditProps> = ({ isOpen, onClose, onSuccess, chapt
     };
     if (!formValues.names) {
       newErrors.names = 'Nombre del capitulo es obligatorio';
-  } else if (!/^[a-zA-ZáéíóúñÁÉÍÓÚÑ\s]+$/.test(formValues.names)) {
+  } else if (!/^[a-zA-ZáéíóúñÁÉÍÓÚÑ\s.]+$/.test(formValues.names)) {
       newErrors.names = 'Nombre del capitulo solo pueden contener letras';
   }    
   if (!formValues.status) newErrors.status = 'Estado es obligatorio';
