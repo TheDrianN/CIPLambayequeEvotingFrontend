@@ -137,8 +137,8 @@ const Page: React.FC<PageProps> = ({ params }) => {
     { value: 'I', label: 'NO VIGENTE' }
 ];
     const optionsRol = [
-        { value: 'V', label: 'Votante' },
-        { value: 'A', label: 'Administrador' }
+        { value: 'V', label: 'VOTANTE' },
+        { value: 'A', label: 'ADMINISTRADOR' }
     ];
 
     const handleSubmit = async (e: React.FormEvent) => {
