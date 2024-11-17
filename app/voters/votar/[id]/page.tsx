@@ -104,7 +104,7 @@ const fetchDataSubElections = async (id: string, access_token:string): Promise<S
         },
       });
       const responseData = await response.json();
-      
+      console.log(responseData);
       return responseData.data && responseData.data.length > 0 ? responseData.data[0].subElections || [] : [];
     }else{
       return  [];
@@ -128,7 +128,7 @@ const fetchCandidatesForSubElection = async (subElectionId: number, access_token
       },
     });
     const responseData = await response.json();
-    
+    console.log(responseData);
     return responseData.data && responseData.data.length > 0 ? responseData.data : [];
   } catch (error) {
     console.error(`Error fetching candidates for subElection ${subElectionId}:`, error);
