@@ -104,7 +104,7 @@ const fetchDataSubElections = async (id: string, access_token:string): Promise<S
         },
       });
       const responseData = await response.json();
-      console.log(responseData);
+      
       return responseData.data && responseData.data.length > 0 ? responseData.data[0].subElections || [] : [];
     }else{
       return  [];
@@ -128,7 +128,7 @@ const fetchCandidatesForSubElection = async (subElectionId: number, access_token
       },
     });
     const responseData = await response.json();
-    console.log(responseData);
+    
     return responseData.data && responseData.data.length > 0 ? responseData.data : [];
   } catch (error) {
     console.error(`Error fetching candidates for subElection ${subElectionId}:`, error);
@@ -167,7 +167,7 @@ const Page: React.FC<{ params: { id: string } }> = ({ params }) => {
               if (decodedToken.sub) {
                 // Aquí es donde usamos `await`
                 const validation = await fetchValidationStatus(decodedToken.sub, params.id, token);
-                console.log(validation.success);
+                //console.log(validation.success);
                 if(validation.success === true){
                   setAuthorized(false);  // Usuario autorizado
                 }else{
@@ -360,7 +360,7 @@ const sendVoteConfirmation = async (): Promise<boolean> => {
     }
 
     const responseData = await response.json();
-    console.log('Respuesta de la API:', responseData);
+    //console.log('Respuesta de la API:', responseData);
 
     // Si todo salió bien, retornar true
     return true;
@@ -407,7 +407,7 @@ const sendVoteConfirmation = async (): Promise<boolean> => {
             datevote: isoDate,
           };
       
-          console.log(electionDetails);
+          //console.log(electionDetails);
       
           // Enviar la primera solicitud POST a /api/vote-status
           const responseStatus = await fetch(`${config.apiBaseUrl}/api/vote-status`, {
@@ -420,14 +420,14 @@ const sendVoteConfirmation = async (): Promise<boolean> => {
           });
       
           // Comprobar si la solicitud fue exitosa
-          console.log(responseStatus.statusText);
+          //console.log(responseStatus.statusText);
           if (!responseStatus.ok) {
             throw new Error('Error al registrar el estado del voto');
           }
       
           const statusData = await responseStatus.json(); // Obtener los datos de la respuesta, incluyendo el `vote_status_id`
           const vote_status_id = statusData.id; // Asumiendo que el ID del estado del voto es `id`
-          console.log(vote_status_id);
+          //console.log(vote_status_id);
       
           // Preparar los votos
           const votes = {
@@ -438,7 +438,7 @@ const sendVoteConfirmation = async (): Promise<boolean> => {
             })),
           };
       
-          console.log(votes);
+          //console.log(votes);
       
           // Enviar los votos por cada subelección
           const votePromises = votes.subelection.map(async (vote) => {

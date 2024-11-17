@@ -84,17 +84,17 @@ const ResultadosElection = () => {
       fetchSubElections(selectedElection, tokenAccess)
         .then((response) => {
           const data = response.data;  // Accedemos al campo `data`
-          console.log('Datos crudos recibidos:', data);  // Imprimir los datos crudos para verificar
+          //console.log('Datos crudos recibidos:', data);  // Imprimir los datos crudos para verificar
   
           if (data && data.length > 0) {
             const formattedOptions = data.map((subElection) => ({
               label: subElection.title,  // Usamos `subElection.title` para las etiquetas
               value: subElection.id,  // Usamos `subElection.id` como valor
             }));
-            console.log('Opciones formateadas:', formattedOptions);  // Verificar que las opciones estén correctas
+            //console.log('Opciones formateadas:', formattedOptions);  // Verificar que las opciones estén correctas
             setSubElections(formattedOptions);  // Guardar las opciones formateadas en el estado
           } else {
-            console.log('No hay datos disponibles para las subelecciones.');  // Si no hay datos
+           // console.log('No hay datos disponibles para las subelecciones.');  // Si no hay datos
             setSubElections([]);
           }
         })
