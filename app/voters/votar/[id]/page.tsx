@@ -466,11 +466,12 @@ const sendVoteConfirmation = async (): Promise<boolean> => {
       const jobIds = results.map((result) => result.jobId);
 
       // Formatear el mensaje con todos los IDs
-      const message = `
+      /*const message = `
       Tu voto ha sido añadido a la cola con los siguientes identificadores de trabajo: ${jobIds.join(', ')}.
       Podrás verificar su estado utilizando estos IDs.
       Recibirás un correo electrónico de confirmación cuando el proceso haya finalizado.
-          `;
+          `;*/
+          const message = 'Votos registrados correctamente'
 
           // Cerrar el Swal de carga
           Swal.close();
